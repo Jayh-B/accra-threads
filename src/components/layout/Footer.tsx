@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Instagram, Twitter, Facebook, Youtube, MapPin, Phone, Mail } from 'lucide-react';
+import { MapPin, Phone, Mail } from 'lucide-react';
 import styles from './Footer.module.css';
 
 const shopLinks   = ['New Arrivals', 'Men', 'Women', 'Accessories', 'Kente Drops', 'Sale'];
@@ -7,10 +7,10 @@ const infoLinks   = ['About Us', 'Sustainability', 'Careers', 'Press Kit', 'Affi
 const supportLinks = ['Help Centre', 'Track Order', 'Returns', 'Size Guide', 'Contact Us'];
 
 const socials = [
-  { icon: Instagram, label: 'Instagram', href: '#' },
-  { icon: Twitter,   label: 'Twitter',   href: '#' },
-  { icon: Facebook,  label: 'Facebook',  href: '#' },
-  { icon: Youtube,   label: 'Youtube',   href: '#' },
+  { label: 'IG', href: '#' },
+  { label: 'TW', href: '#' },
+  { label: 'FB', href: '#' },
+  { label: 'YT', href: '#' },
 ];
 
 export default function Footer() {
@@ -30,7 +30,7 @@ export default function Footer() {
           <div className={styles.socials}>
             {socials.map(s => (
               <a key={s.label} href={s.href} aria-label={s.label} className={styles.socialBtn}>
-                <s.icon size={17} />
+                <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>{s.label}</span>
               </a>
             ))}
           </div>

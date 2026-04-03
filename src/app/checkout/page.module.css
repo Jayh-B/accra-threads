@@ -1,0 +1,221 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  width: 100%;
+}
+
+@media (max-width: 768px) { .page { padding: 24px 16px; } }
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 48px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 24px;
+}
+
+.logoMarkX {
+  width: 40px;
+  height: 40px;
+  background: var(--color-primary);
+  color: var(--color-secondary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.125rem;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.secureBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-accent-green);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 64px;
+}
+
+@media (max-width: 1024px) { .layout { grid-template-columns: 1fr; gap: 48px; } }
+
+.main { flex: 1; }
+
+.stepBox {
+  background: var(--color-surface-dark);
+}
+
+/* Address Step */
+.savedAddr {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+@media (max-width: 640px) { .savedAddr { grid-template-columns: 1fr; } }
+
+.addrCard {
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 150ms;
+}
+
+.addrCardActive { border-color: var(--color-primary); background: var(--color-primary-subtle); }
+.addrLabel { flex: 1; cursor: pointer; font-size: 0.875rem; color: var(--color-text-2); line-height: 1.6; }
+.addrLabel strong { color: var(--color-text-1); font-size: 0.9375rem; display: block; margin-bottom: 8px; }
+
+.addrRadio input { accent-color: var(--color-primary); width: 18px; height: 18px; margin-top: 2px; }
+
+.newAddrForm {
+  background: var(--color-surface-raised);
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  margin-top: 16px;
+}
+
+/* Payment Step */
+.payTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.payTabs::-webkit-scrollbar { display: none; }
+
+.payTab {
+  padding: 10px 24px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-2);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 150ms;
+  white-space: nowrap;
+}
+.payTabActive {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-secondary);
+}
+
+.momoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 640px) { .momoGrid { grid-template-columns: 1fr; } }
+
+.momoBox {
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 150ms;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+}
+.momoBox:hover { border-color: rgba(212,160,23,0.5); color: var(--color-text-1); }
+.momoActive { border-color: var(--color-primary); color: var(--color-text-1); background: var(--color-primary-subtle); }
+.momoColor { width: 32px; height: 32px; border-radius: 8px; }
+
+.momoHint { font-size: 0.75rem; color: var(--color-text-3); margin-top: 8px; }
+
+.paystackPreview {
+  background: var(--color-surface-raised);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  text-align: center;
+}
+.paystackLogo { display: inline-block; padding: 6px 12px; background: #00C3F7; color: #fff; font-weight: 600; border-radius: 4px; margin-bottom: 16px; }
+
+.payActions { display: flex; justify-content: space-between; align-items: center; margin-top: 48px; border-top: 1px solid var(--color-border); padding-top: 24px; }
+
+/* Confirmation Step */
+.successIcon {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(27, 77, 46, 0.15);
+  border: 2px solid var(--color-accent-green);
+  color: var(--color-accent-green);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 auto 24px;
+}
+.earnBadge {
+  display: inline-block;
+  padding: 8px 16px;
+  background: rgba(212,160,23,0.1);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-pill);
+  color: var(--color-primary);
+  font-size: 0.875rem;
+}
+
+/* Summary Right */
+.summaryCard {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  padding: 24px;
+  position: sticky;
+  top: 100px;
+}
+
+.sumItems { display: flex; flex-direction: column; gap: 16px; }
+
+.sumItem { display: flex; gap: 16px; align-items: center; }
+
+.sumImgWrap {
+  position: relative;
+  width: 64px;
+  aspect-ratio: 3/4;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+}
+.sumImg { object-fit: cover; border-radius: var(--radius-sm); }
+.sumQtyBadge {
+  position: absolute;
+  top: -8px; right: -8px;
+  width: 20px; height: 20px;
+  background: var(--color-text-3); color: #fff;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 0.625rem; font-weight: 600;
+}
+
+.sumItemInfo { flex: 1; }
+.sumName { font-size: 0.875rem; color: var(--color-text-1); font-weight: 500; }
+.sumVar { font-size: 0.75rem; color: var(--color-text-3); margin-top: 4px; }
+.sumItemPrice { font-family: var(--font-mono); font-size: 0.875rem; color: var(--color-text-1); }
+
+.sumRow {
+  display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--color-text-2); margin-bottom: 12px;
+}
+.sumRow span:last-child { color: var(--color-text-1); }
+
+.sumTotal { font-size: 1.125rem; font-weight: 600; margin-bottom: 0; color: var(--color-text-1); }

@@ -1,0 +1,18 @@
+.card { display: block; }
+.imageWrap {
+  display: block;
+  position: relative;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background: var(--color-surface-raised);
+}
+.img { object-fit: cover; }
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 0.75rem;
+}
+.rating { color: var(--color-primary); font-weight: 600; }
+.reviews { color: var(--color-text-3); }

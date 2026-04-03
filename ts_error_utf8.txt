@@ -1,0 +1,6 @@
+﻿src/app/orders/[id]/track/page.tsx(122,48): error TS2339: Property 'slug' does not exist on type '{ name: string; qty: number; price: number; image: string; }'.
+src/app/orders/[id]/track/page.tsx(123,65): error TS2339: Property 'size' does not exist on type '{ name: string; qty: number; price: number; image: string; }'.
+src/components/layout/Footer.tsx(2,10): error TS2305: Module '"lucide-react"' has no exported member 'Instagram'.
+src/components/layout/Footer.tsx(2,21): error TS2305: Module '"lucide-react"' has no exported member 'Twitter'.
+src/components/layout/Footer.tsx(2,30): error TS2305: Module '"lucide-react"' has no exported member 'Facebook'.
+src/components/layout/Footer.tsx(2,40): error TS2305: Module '"lucide-react"' has no exported member 'Youtube'.

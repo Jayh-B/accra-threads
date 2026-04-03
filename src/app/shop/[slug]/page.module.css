@@ -1,0 +1,130 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  width: 100%;
+}
+
+@media (max-width: 768px) { .page { padding: 24px 16px; } }
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--color-text-3);
+  margin-bottom: 32px;
+}
+.breadcrumb a { transition: color 150ms; }
+.breadcrumb a:hover { color: var(--color-primary); }
+.breadcrumb span { color: var(--color-text-1); font-weight: 500; }
+
+.productLayout {
+  display: grid;
+  grid-template-columns: 1fr 440px;
+  gap: 64px;
+}
+
+@media (max-width: 1024px) { .productLayout { grid-template-columns: 1fr 380px; gap: 40px; } }
+@media (max-width: 768px)  { .productLayout { grid-template-columns: 1fr; } }
+
+.gallery {
+  display: flex;
+  gap: 24px;
+  height: min(80vh, 800px);
+}
+
+@media (max-width: 768px) { .gallery { flex-direction: column-reverse; height: auto; gap: 16px; } }
+
+.thumbnails {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 80px;
+}
+
+@media (max-width: 768px) { .thumbnails { flex-direction: row; width: 100%; } }
+
+.thumbBtn {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid transparent;
+  background: var(--color-surface-raised);
+}
+
+@media (max-width: 768px) { .thumbBtn { width: 64px; } }
+
+.thumbActive { border-color: var(--color-primary); }
+.thumbImg { object-fit: cover; }
+
+.mainImageWrap {
+  flex: 1;
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface-raised);
+}
+
+@media (max-width: 768px) { .mainImageWrap { aspect-ratio: 3/4; } }
+
+.mainImg { object-fit: cover; }
+
+/* Info */
+.info { display: flex; flex-direction: column; }
+
+.headerRow { margin-bottom: 16px; }
+.sku { font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-text-3); display: block; margin-top: 8px; }
+
+.priceRow { display: flex; align-items: center; gap: 12px; }
+.price { font-family: var(--font-mono); font-size: 1.5rem; color: var(--color-primary); }
+.priceOld { font-family: var(--font-mono); font-size: 1.125rem; color: var(--color-text-3); text-decoration: line-through; }
+
+.optionGroup { margin-bottom: 24px; }
+.optionHeader { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
+.optionLabel { font-size: 0.875rem; font-weight: 500; color: var(--color-text-2); }
+.optionValue { font-size: 0.8125rem; color: var(--color-text-1); font-weight: 600; }
+
+.colorWrap { display: flex; gap: 12px; }
+.colorChip {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  outline: 2px solid transparent;
+  cursor: pointer;
+  transition: all 150ms;
+}
+.colorActive { outline-color: var(--color-primary); outline-offset: 2px; }
+
+.sizeGuideBtn { font-size: 0.75rem; color: var(--color-text-3); text-decoration: underline; background: none; border: none; cursor: pointer; }
+.sizeGuideBtn:hover { color: var(--color-text-1); }
+
+.pillNote { font-size: 0.625rem; opacity: 0.7; margin-left: 4px; }
+
+.actions { display: flex; gap: 16px; margin-top: 8px; margin-bottom: 24px; }
+.wishBtn { width: 56px; padding: 0; display: flex; align-items: center; justify-content: center; }
+
+.pointsEarn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(27, 77, 46, 0.1);
+  border: 1px solid rgba(27, 77, 46, 0.2);
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  color: var(--color-text-2);
+}
+.pointIcon { font-size: 1.25rem; }
+
+.descBlock { color: var(--color-text-2); font-size: 0.9375rem; line-height: 1.6; }
+.descText { white-space: pre-wrap; }
+
+.related { border-top: 1px solid var(--color-border); margin-top: 64px; }
+.relatedGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+
+@media (max-width: 1024px) { .relatedGrid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px)  { .relatedGrid { grid-template-columns: repeat(2, 1fr); gap: 16px; } }

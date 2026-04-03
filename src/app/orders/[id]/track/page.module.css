@@ -1,0 +1,163 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  width: 100%;
+}
+
+@media (max-width: 768px) { .page { padding: 24px 16px; } }
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--color-text-3);
+  margin-bottom: 24px;
+}
+.breadcrumb a { color: var(--color-text-2); text-decoration: none; transition: color 150ms; }
+.breadcrumb a:hover { color: var(--color-primary); }
+.breadcrumb span { color: var(--color-text-1); font-weight: 500; }
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 48px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+@media (max-width: 640px) { .header { flex-direction: column; align-items: flex-start; gap: 16px; } }
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 64px;
+}
+
+@media (max-width: 1024px) { .layout { grid-template-columns: 1fr; gap: 48px; } }
+
+.main { flex: 1; }
+
+.statusBox {
+  background: var(--color-surface-dark);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+}
+
+@media (max-width: 640px) { .statusBox { padding: 24px; } }
+
+.progressWrap {
+  position: relative;
+  margin-bottom: 64px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.progressBarBg {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  right: 24px;
+  height: 4px;
+  background: var(--color-surface-raised);
+  border-radius: 2px;
+  z-index: 1;
+}
+
+@media (max-width: 640px) {
+  .progressBarBg { top: 0; bottom: 0; left: 24px; width: 4px; height: auto; right: auto; margin-top: 24px; margin-bottom: 24px; }
+}
+
+.progressBarFill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 2px;
+  transition: width 1s ease;
+}
+
+@media (max-width: 640px) {
+  .progressBarFill { width: 100% !important; height: auto; transition: height 1s ease; }
+}
+
+.nodes {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 640px) { .nodes { flex-direction: column; gap: 40px; } }
+
+.node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  width: 120px;
+}
+
+@media (max-width: 640px) { .node { flex-direction: row; text-align: left; width: 100%; } }
+
+.iconWrap {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--color-surface-raised);
+  border: 2px solid var(--color-border);
+  color: var(--color-text-3);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 300ms;
+}
+
+.nodeDone .iconWrap {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-secondary);
+  box-shadow: 0 0 12px rgba(212,160,23,0.3);
+}
+
+.nodeLabels { display: flex; flex-direction: column; gap: 4px; }
+
+.nodeTitle { font-size: 0.875rem; font-weight: 500; color: var(--color-text-2); }
+.nodeTime { font-size: 0.75rem; color: var(--color-text-3); font-family: var(--font-mono); }
+
+.nodeDone .nodeTitle { color: var(--color-text-1); font-weight: 600; }
+
+.orderSummary {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  position: sticky;
+  top: 100px;
+}
+
+@media (max-width: 640px) { .orderSummary { padding: 24px; position: static; } }
+
+.itemsList { display: flex; flex-direction: column; gap: 16px; }
+
+.itemRow { display: flex; gap: 16px; align-items: center; }
+
+.itemImgWrap {
+  width: 64px; aspect-ratio: 3/4;
+  position: relative;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.itemImg { object-fit: cover; }
+
+.itemInfo { flex: 1; }
+.itemName { font-size: 0.875rem; font-weight: 500; color: var(--color-text-1); text-decoration: none; display: block; margin-bottom: 4px; }
+.itemName:hover { color: var(--color-primary); }
+.itemMeta { font-size: 0.75rem; color: var(--color-text-3); }
+
+.itemPrice { font-family: var(--font-mono); font-size: 0.875rem; color: var(--color-text-1); text-align: right; }
+
+.sumRow { display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--color-text-2); margin-bottom: 12px; }
+.sumRow span:last-child { color: var(--color-text-1); font-weight: 500; }
+.sumTotalRow { font-size: 1.125rem; font-weight: 600; margin-bottom: 0; }
