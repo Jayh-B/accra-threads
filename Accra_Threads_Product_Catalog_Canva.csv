@@ -1,0 +1,43 @@
+,,,
+,ACCRA THREADS — CANVA BULK CREATION GUIDE,,
+,Product Catalog Spreadsheet  •  208 SKUs across 4 Categories,,
+,,,
+,,,
+,STEP,ACTION,DETAILS
+,1,Open Canva,Go to canva.com → open your product card template
+,2,Click 'Bulk Create',In the left toolbar → Apps → Bulk Create
+,3,Upload this file,Choose 'Upload CSV or Excel' → select this file
+,4,Select a Sheet,"Choose the category sheet you want (Men's, Women's, etc.)"
+,5,Map the Columns,"Drag each column header to its matching element in your design:
+• Product_Name → Title text
+• Price_GHS → Price text
+• Badge → Badge/label element
+• Short_Description → Subtitle text
+• Colors_Available → Colour info text
+• Sizes_Available → Sizes text
+• SKU → Order code text
+• Collection_Tag → Collection label
+• Canva_Image_Keyword → Use as image search hint"
+,6,Generate Designs,Click 'Generate X designs' — one card per row
+,7,Review & Export,Edit individual cards if needed → Export as PNG/PDF
+,,,
+,COLUMN GUIDE,COLUMN NAME,WHAT IT MAPS TO IN CANVA
+,,SKU,Product code (JetBrains Mono font element)
+,,Category,Category tab / section label
+,,Subcategory,Sub-label under category
+,,Product_Name,Main product title (Playfair Display)
+,,Short_Description,Subtitle / description text block
+,,Price_GHS,Price display (e.g. GHS 320)
+,,Original_Price_GHS,Struck-through original price (sale items only)
+,,Badge,Badge overlay: NEW | SALE | LIMITED | ARTISAN | HERITAGE | FEATURED
+,,Badge_Color,Suggested badge colour hex for design
+,,Colors_Available,Colour variants listed (e.g. Black/Gold | White/Multi)
+,,Sizes_Available,Size run (e.g. XS – 3XL or 36 – 42)
+,,Gender,Men | Women | Unisex
+,,Is_Sale,TRUE/FALSE — show sale styling
+,,Is_Limited,TRUE/FALSE — show countdown/limited badge
+,,Is_Featured,TRUE/FALSE — show featured highlight
+,,Units_Remaining,For LIMITED items — shows stock count
+,,Collection_Tag,e.g. SS25 Drop | Ghana@68 | Diaspora Series
+,,Price_Range_GHS,Budget tier label for filters
+,,Canva_Image_Keyword,Keyword hint for Canva image search
