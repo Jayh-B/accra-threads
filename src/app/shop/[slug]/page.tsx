@@ -1,16 +1,18 @@
 'use client';
-import { useState } from 'react';
+import { useState, use } from 'react';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { Star, Minus, Plus, Heart, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+import { Minus, Plus, Heart, ChevronRight } from 'lucide-react';
 import { getProduct, getRelated } from '@/lib/data';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import ProductCard from '@/components/ui/ProductCard';
 import styles from './page.module.css';
 
-export default function ProductDetail({ params }: { params: { slug: string } }) {
-  const product = getProduct(params.slug);
+export default function ProductDetail({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+  const product = getProduct(slug);
   if (!product) notFound();
 
   const related = getRelated(product);
@@ -50,8 +52,8 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
     <div className={styles.page}>
       {/* Breadcrumb */}
       <div className={styles.breadcrumb}>
-        <a href="/">Home</a> <ChevronRight size={12} />
-        <a href="/shop">Shop</a> <ChevronRight size={12} />
+        <Link href="/">Home</Link> <ChevronRight size={12} />
+        <Link href="/shop">Shop</Link> <ChevronRight size={12} />
         <span>{product.name}</span>
       </div>
 

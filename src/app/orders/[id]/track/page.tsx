@@ -1,20 +1,22 @@
 'use client';
-import { notFound } from 'next/navigation';
+
+import { use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Package, Truck, CheckCircle2, ChevronRight } from 'lucide-react';
 import { orders } from '@/lib/data';
 import styles from './page.module.css';
 
-export default function TrackOrderPage({ params }: { params: { id: string } }) {
-  const order = orders.find(o => o.id === params.id);
+export default function TrackOrderPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const order = orders.find(o => o.id === id);
   
   if (!order) {
     return (
       <div className={styles.page}>
         <div style={{ textAlign: 'center', padding: '100px 20px' }}>
           <h1 className="font-display text-4xl mb-4">Order Not Found</h1>
-          <p className="text-secondary mb-8">We couldn't find an order with the ID {params.id}.</p>
+          <p className="text-secondary mb-8">We couldn&apos;t find an order with the ID {id}.</p>
            <Link href="/account?tab=orders" className="btn btn-primary">Back to Orders</Link>
         </div>
       </div>

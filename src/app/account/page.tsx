@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, use } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Package, Heart, CreditCard, User, LogOut } from 'lucide-react';
@@ -7,8 +7,9 @@ import { orders } from '@/lib/data';
 import { useWishlist } from '@/context/WishlistContext';
 import styles from './page.module.css';
 
-export default function AccountPage({ searchParams }: { searchParams: { tab?: string } }) {
-  const [tab, setTab] = useState(searchParams.tab || 'overview');
+export default function AccountPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const resolvedSearchParams = use(searchParams);
+  const [tab, setTab] = useState(resolvedSearchParams.tab || 'overview');
   const { items: wishlist } = useWishlist();
 
   return (
