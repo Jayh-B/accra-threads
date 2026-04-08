@@ -7,31 +7,31 @@ import styles from './page.module.css';
 /* ── Helper data ─────────────────────────────────────────── */
 
 const filmStrip = [
-  { img: '/products/accra-fc-streetwear-black-jersey.jpg',  caption: 'Street Culture' },
-  { img: '/products/ghana-black-stars-heritage-jersey.jpg', caption: 'Heritage' },
-  { img: '/products/stadium-bomber.jpg',                    caption: 'Stadium Nights' },
-  { img: '/products/ghanaian-retro-track-suit-top.jpg',     caption: 'Retro Revival' },
-  { img: '/products/accra-skyline-crewneck-sweatshirt.jpg', caption: 'City Living' },
-  { img: '/products/nkrumah-tribute-graphic-tee.png',       caption: 'Legacy' },
-  { img: '/products/black-stars-away-kit-hoodie.png',       caption: 'Away Kit' },
-  { img: '/products/blue-adinkra-sports-polo.png',          caption: 'Crafted Details' },
+  { img: '/products/Accra HEAT Oversized Hoodie.jpg',  caption: 'Street Culture' },
+  { img: '/products/Kente Denim Maxi Skirt.jpg', caption: 'Heritage' },
+  { img: '/products/Streetwear Sweat Shorts.jpg',                    caption: 'Stadium Nights' },
+  { img: '/products/Ankara Mini Skirt.jpg',     caption: 'Retro Revival' },
+  { img: '/products/Wide-Leg Palazzo (Women\'s).jpg', caption: 'City Living' },
+  { img: '/products/Boubou Dress (Modern).jpg',       caption: 'Legacy' },
+  { img: '/products/Accra Streets Duffel Bag.jpg',       caption: 'Away Kit' },
+  { img: '/products/Black Stars Gym Bag.jpg',          caption: 'Crafted Details' },
 ];
 
 const editorials = [
   {
-    img: '/products/stadium-bomber.jpg',
+    img: '/products/Accra HEAT Oversized Hoodie.jpg',
     tag: 'Feature Story',
-    title: 'Asafo Warriors — The Stadium Bomber',
+    title: 'Asafo Warriors — Accra HEAT Hoodie',
     desc: 'Heritage stitched into every seam.',
   },
   {
-    img: '/products/ghana-black-stars-heritage-jersey.jpg',
+    img: '/products/Kente Denim Maxi Skirt.jpg',
     tag: 'Heritage Collection',
-    title: 'Black Stars Reborn',
+    title: 'Kente Denim Reborn',
     desc: 'Vintage styling. Modern soul.',
   },
   {
-    img: '/products/accra-skyline-crewneck-sweatshirt.jpg',
+    img: '/products/Wide-Leg Palazzo (Women\'s).jpg',
     tag: 'City Series',
     title: 'Osu Nights',
     desc: 'Wearing the skyline, owning the night.',
@@ -42,7 +42,7 @@ const collections = [
   {
     name: 'Match Day',
     desc: 'Jerseys and hoodies built for the stands and the streets.',
-    img: '/products/accra-fc-streetwear-black-jersey.jpg',
+    img: '/products/Accra HEAT Oversized Hoodie.jpg',
     href: '/shop?cat=men',
     num: '01',
     badge: 'New Arrivals',
@@ -50,7 +50,7 @@ const collections = [
   {
     name: 'Heritage Drops',
     desc: 'Kente-inspired pieces carrying the weight of Ghanaian history.',
-    img: '/products/stadium-bomber.jpg',
+    img: '/products/Kente Kimono Jacket.jpg',
     href: '/shop?cat=kente',
     num: '02',
     badge: 'Kente',
@@ -58,7 +58,7 @@ const collections = [
   {
     name: 'Pan-African Active',
     desc: 'Built for movement. Designed for Accra\'s heat.',
-    img: '/products/ghanaian-retro-track-suit-top.jpg',
+    img: '/products/Streetwear Sweat Shorts.jpg',
     href: '/shop?cat=men',
     num: '03',
     badge: 'Active Wear',
@@ -77,7 +77,7 @@ export default function LookbookPage() {
       <section className={styles.hero}>
         <div className={styles.heroBg}>
           <Image
-            src="/products/stadium-bomber.jpg"
+            src="/products/Kente Kimono Jacket.jpg"
             alt="Accra Threads Lookbook SS25"
             fill
             priority
@@ -183,8 +183,8 @@ export default function LookbookPage() {
             <div className={styles.storyImageStack}>
               <div className={styles.storyImgMain}>
                 <Image
-                  src="/products/nkrumah-tribute-graphic-tee.png"
-                  alt="Nkrumah Tribute Tee"
+                  src="/products/Boubou Dress (Modern).jpg"
+                  alt="Boubou Dress"
                   fill
                   className={styles.heroImg}
                   sizes="(max-width: 1024px) 100vw, 35vw"
@@ -192,8 +192,8 @@ export default function LookbookPage() {
               </div>
               <div className={styles.storyImgAccent}>
                 <Image
-                  src="/products/accra-fc-streetwear-black-jersey.jpg"
-                  alt="Accra FC Jersey"
+                  src="/products/Black Stars Gym Bag.jpg"
+                  alt="Black Stars Gym Bag"
                   fill
                   className={styles.heroImg}
                   sizes="(max-width: 1024px) 100vw, 25vw"
