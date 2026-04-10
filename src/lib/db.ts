@@ -1,5 +1,4 @@
 // Supabase server client for data fetches
-'use server';
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextRequest } from 'next/server';

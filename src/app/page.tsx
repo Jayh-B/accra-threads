@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import ProductCard from '@/components/ui/ProductCard';
 import { fetchFeaturedProducts } from '@/lib/data';
-import categories, { lookbookItems } from '@/lib/data';
+import { categories, lookbookItems } from '@/lib/data';
 import styles from './page.module.css';
 
 export default async function Home() {
@@ -54,7 +54,7 @@ export default async function Home() {
       <section className="section bg-surface">
         <div className="container">
           <div className={styles.catGrid}>
-            {categories.map((c, i) => (
+            {categories.map((c: any, i: number) => (
               <Link key={c.id} href={c.href} className={`${styles.catCard} ${i === 3 ? styles.catCardTall : ''}`}>
                 <Image src={c.image} alt={c.label} fill sizes="(max-width: 640px) 100vw, 50vw" className={styles.catImg} />
                 <div className={styles.catOverlay}>

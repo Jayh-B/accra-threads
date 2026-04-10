@@ -1,4 +1,5 @@
 import { db, type DbProduct, type Product, toProduct } from './db';
+export type { Product };
 
 export async function fetchProducts(category?: string): Promise<Product[]> {
   let query = db.from('products').select('*').eq('published', true);
@@ -52,14 +53,11 @@ export const getRelated = async (product: Product) => {
 };
 
 // Legacy static (remove after wiring)
-export const products: Product[] = [] as Product[];
-export const categories = [
-  { id: 'hoodies', label: 'Men', image: '', href: '/shop?cat=hoodies' },
-  { id: 'skirts', label: 'Women', image: '', href: '/shop?cat=skirts' },
-  { id: 'bags', label: 'Accessories', image: '', href: '/shop?cat=bags' },
-  { id: 'jackets', label: 'Kente Drops', image: '', href: '/shop?cat=jackets' },
-];
-
+export const products: Product[] = [
+  {
+    id: "AT-25-001",
+    name: "Accra FC Streetwear Jersey (Black)",
+    slug: "accra-fc-streetwear-jersey-black",
     price: 350,
     images: ["/products/accra-fc-streetwear-black-jersey.jpg"],
     description: "Premium streetwear jersey inspired by Accra's vibrant football culture. Breathable mesh fabric with custom Accra crest.",
@@ -289,8 +287,8 @@ export const categories = [
   }
 ];
 
-export const getProduct = (slug: string) => products.find(p => p.slug === slug);
-export const getRelated = (product: Product) => products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+// export const getProduct = (slug: string) => products.find(p => p.slug === slug);
+// export const getRelated = (product: Product) => products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
 
 export const categories = [
   { id: 'men', label: 'Men', image: '/products/stadium-bomber.jpg', href: '/shop?cat=men' },

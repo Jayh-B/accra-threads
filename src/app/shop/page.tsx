@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import ProductCard from '@/components/ui/ProductCard';
-import { FilterList } from '@/components/shop/FilterList';
+// import { FilterList } from '@/components/shop/FilterList';
 import { fetchProducts } from '@/lib/data';
 import styles from './page.module.css';
 
@@ -17,7 +17,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     <div className={styles.shopLayout}>
       {/* Desktop Sidebar */}
       <aside className={`${styles.sidebar} hide-mobile`}>
-        <FilterList />
+        {/* <FilterList /> */}
       </aside>
 
       <div className={styles.main}>

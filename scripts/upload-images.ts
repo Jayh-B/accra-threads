@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
-import { slugify } from 'slugify'; // npm i slugify
+import slugify from 'slugify'; // npm i slugify
 
 const supabaseUrl = 'https://jmdqojuxsixtxbavmrwq.supabase.co';
 const supabaseServiceKey = 'sb_secret__9rvhj0Wy-T31-ip_jW1ZQ_cvztNzsY';  // Service role for uploads
