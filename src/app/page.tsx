@@ -1,11 +1,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import ProductCard from '@/components/ui/ProductCard';
-import { products, categories, lookbookItems } from '@/lib/data';
+import { fetchFeaturedProducts } from '@/lib/data';
+import categories, { lookbookItems } from '@/lib/data';
 import styles from './page.module.css';
 
-export default function Home() {
-  const newArrivals = products.slice(0, 4);
+export default async function Home() {
+  const newArrivals = await fetchFeaturedProducts();
+
 
   return (
     <>

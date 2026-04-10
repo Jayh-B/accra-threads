@@ -89,12 +89,34 @@ html {
 body {
   font-family: var(--font-body);
   font-weight: 400;
-  background-color: var(--color-secondary);
-  color: var(--color-text-1);
+  background-color: var(--color-surface-light);
+  color: var(--color-text-dark-1);
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
 }
+
+/* ============================================================
+   HERO — always dark, never inherits light body
+   ============================================================ */
+.hero {
+  background-color: var(--color-secondary);
+  color: var(--color-text-1);
+}
+
+/* ============================================================
+   LIGHT-PAGE OVERRIDES
+   Sections that sit on the white body need dark text tokens
+   ============================================================ */
+.section-title    { color: var(--color-text-dark-1); }
+.section-subtitle { color: var(--color-text-dark-2); }
+
+/* Pills & accordion on light bg: swap to dark-border token */
+.pill             { border-color: var(--color-border-light); color: var(--color-text-dark-2); }
+.accordion-item   { border-bottom-color: var(--color-border-light); }
+.accordion-trigger{ color: var(--color-text-dark-1); }
+.accordion-inner  { color: var(--color-text-dark-2); }
+.divider          { background: var(--color-border-light); }
 
 img, video {
   display: block;

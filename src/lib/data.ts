@@ -1,26 +1,65 @@
-export interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  originalPrice?: number;
-  images: string[];
-  description: string;
-  category: 'men' | 'women' | 'accessories' | 'kente drops';
-  rating: number;
-  reviewCount: number;
-  isNew?: boolean;
-  isSale?: boolean;
-  cowriePoints: number;
-  colors: { name: string; hex: string }[];
-  sizes: { label: string; stock: number }[];
+import { db, type DbProduct, type Product, toProduct } from './db';
+
+export async function fetchProducts(category?: string): Promise<Product[]> {
+  let query = db.from('products').select('*').eq('published', true);
+  
+  if (category) {
+    query = query.eq('category', category);
+  }
+  
+  const { data, error } = await query.order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  
+  return data.map(toProduct);
 }
 
-export const products: Product[] = [
-  {
-    id: "AT-25-001",
-    name: "Accra FC Streetwear Jersey (Black)",
-    slug: "accra-fc-streetwear-jersey-black",
+export async function fetchProduct(slug: string): Promise<Product | null> {
+  const { data, error } = await db
+    .from('products')
+    .select('*')
+    .eq('slug', slug)
+    .eq('published', true)
+    .single();
+
+  if (error || !data) return null;
+  
+  return toProduct(data as DbProduct);
+}
+
+export async function fetchFeaturedProducts(): Promise<Product[]> {
+  const { data, error } = await db
+    .from('products')
+    .select('*')
+    .eq('featured', true)
+    .eq('published', true)
+    .order('created_at', { ascending: false })
+    .limit(8);
+
+  if (error) throw error;
+  
+  return data.map(toProduct);
+}
+
+export const getProduct = async (slug: string) => {
+  const product = await fetchProduct(slug);
+  return product;
+};
+
+export const getRelated = async (product: Product) => {
+  const related = await fetchProducts(product.category);
+  return related.filter(p => p.slug !== product.slug).slice(0, 4);
+};
+
+// Legacy static (remove after wiring)
+export const products: Product[] = [] as Product[];
+export const categories = [
+  { id: 'hoodies', label: 'Men', image: '', href: '/shop?cat=hoodies' },
+  { id: 'skirts', label: 'Women', image: '', href: '/shop?cat=skirts' },
+  { id: 'bags', label: 'Accessories', image: '', href: '/shop?cat=bags' },
+  { id: 'jackets', label: 'Kente Drops', image: '', href: '/shop?cat=jackets' },
+];
+
     price: 350,
     images: ["/products/accra-fc-streetwear-black-jersey.jpg"],
     description: "Premium streetwear jersey inspired by Accra's vibrant football culture. Breathable mesh fabric with custom Accra crest.",
