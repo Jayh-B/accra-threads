@@ -18,7 +18,7 @@ const socials = [
 export default function Footer() {
   const pathname = usePathname();
   
-  if (pathname?.startsWith('/admin')) return null;
+  if (pathname?.startsWith('/admin') || pathname === '/login') return null;
 
   return (
     <footer className={styles.footer}>

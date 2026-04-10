@@ -10,23 +10,23 @@
    ============================================================ */
 :root {
   /* Colors */
-  --color-primary: #D4A017;
-  --color-primary-hover: #B8891A;
-  --color-primary-subtle: rgba(212, 160, 23, 0.12);
-  --color-secondary: #0D0D0D;
-  --color-accent-red: #B5352B;
-  --color-accent-green: #1B4D2E;
-  --color-surface-light: #F5F0E8;
-  --color-surface-dark: #141414;
-  --color-surface-raised: #1E1E1E;
-  --color-surface-card: #181818;
-  --color-border: rgba(255, 255, 255, 0.08);
+  --color-primary: #222222;
+  --color-primary-hover: #000000;
+  --color-primary-subtle: rgba(34, 34, 34, 0.05);
+  --color-secondary: #FFFFFF;
+  --color-accent-red: #FA3445;
+  --color-accent-green: #2B8A3E;
+  --color-surface-light: #F7F7F7;
+  --color-surface-dark: #FFFFFF;
+  --color-surface-raised: #FFFFFF;
+  --color-surface-card: #FFFFFF;
+  --color-border: rgba(0, 0, 0, 0.08);
   --color-border-light: rgba(0, 0, 0, 0.08);
-  --color-text-1: #F5F0E8;
-  --color-text-2: #AAAAAA;
-  --color-text-3: #666666;
-  --color-text-dark-1: #0D0D0D;
-  --color-text-dark-2: #555555;
+  --color-text-1: #222222;
+  --color-text-2: #666666;
+  --color-text-3: #999999;
+  --color-text-dark-1: #222222;
+  --color-text-dark-2: #666666;
   --color-text-dark-3: #999999;
 
   /* Typography */
@@ -54,11 +54,11 @@
   --radius-pill: 9999px;
 
   /* Shadows */
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08);
-  --shadow-raised: 0 8px 32px rgba(0, 0, 0, 0.14);
-  --shadow-gold: 0 4px 24px rgba(212, 160, 23, 0.25);
-  --shadow-dark-card: 0 2px 12px rgba(0, 0, 0, 0.4);
-  --shadow-dark-raised: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.04);
+  --shadow-raised: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-gold: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-dark-card: 0 1px 4px rgba(0, 0, 0, 0.04);
+  --shadow-dark-raised: 0 8px 24px rgba(0, 0, 0, 0.12);
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -89,7 +89,7 @@ html {
 body {
   font-family: var(--font-body);
   font-weight: 400;
-  background-color: var(--color-surface-light);
+  background-color: #FFFFFF;
   color: var(--color-text-dark-1);
   line-height: 1.6;
   min-height: 100vh;
@@ -97,10 +97,10 @@ body {
 }
 
 /* ============================================================
-   HERO — always dark, never inherits light body
+   HERO 
    ============================================================ */
 .hero {
-  background-color: var(--color-secondary);
+  background-color: var(--color-surface-light);
   color: var(--color-text-1);
 }
 
@@ -274,12 +274,12 @@ ul, ol {
 /* Primary */
 .btn-primary {
   background: var(--color-primary);
-  color: var(--color-secondary);
-  box-shadow: var(--shadow-gold);
+  color: #FFFFFF;
+  box-shadow: none;
 }
 .btn-primary:hover {
   background: var(--color-primary-hover);
-  box-shadow: 0 6px 32px rgba(212, 160, 23, 0.4);
+  box-shadow: var(--shadow-raised);
   transform: translateY(-1px);
 }
 .btn-primary:active { transform: translateY(0); }
@@ -298,13 +298,13 @@ ul, ol {
 
 /* Ghost */
 .btn-ghost {
-  background: transparent;
-  color: var(--color-text-1);
-  border: 1.5px solid rgba(245, 240, 232, 0.3);
+  background: #FFFFFF;
+  color: var(--color-primary);
+  border: 1.5px solid var(--color-border);
 }
 .btn-ghost:hover {
-  border-color: rgba(245, 240, 232, 0.7);
-  background: rgba(245, 240, 232, 0.05);
+  border-color: var(--color-primary);
+  background: var(--color-surface-light);
 }
 
 /* Destructive */
@@ -334,12 +334,12 @@ ul, ol {
   white-space: nowrap;
 }
 
-.badge-new     { background: var(--color-primary); color: var(--color-secondary); }
+.badge-new     { background: var(--color-primary); color: #fff; }
 .badge-sale    { background: var(--color-accent-red); color: #fff; }
-.badge-low     { background: rgba(212,160,23,0.15); color: var(--color-primary); border: 1px solid var(--color-primary); }
-.badge-sold    { background: rgba(255,255,255,0.08); color: var(--color-text-2); }
+.badge-low     { background: rgba(250,52,69,0.1); color: var(--color-accent-red); border: 1px solid var(--color-accent-red); }
+.badge-sold    { background: var(--color-surface-light); color: var(--color-text-2); }
 .badge-cowrie  { background: var(--color-accent-green); color: #fff; }
-.badge-feat    { background: rgba(255,255,255,0.1); color: var(--color-text-1); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.badge-feat    { background: rgba(0,0,0,0.05); color: var(--color-text-1); }
 
 /* ============================================================
    INPUT FIELDS
@@ -440,26 +440,40 @@ ul, ol {
 .product-card:hover .product-card__img--alt { opacity: 1; }
 .product-card:hover .product-card__img--primary { opacity: 0; }
 
-.product-card__quick-view {
+.product-card__actions {
   position: absolute;
   bottom: var(--space-4);
-  left: 50%;
-  transform: translateX(-50%) translateY(8px);
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  transform: translateY(8px);
   opacity: 0;
   transition: all var(--transition-base);
-  white-space: nowrap;
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  background: rgba(13,13,13,0.85) !important;
-  color: #fff !important;
-  border: 1px solid rgba(255,255,255,0.15) !important;
-  font-size: 0.75rem !important;
-  padding: var(--space-2) var(--space-4) !important;
 }
 
-.product-card:hover .product-card__quick-view {
+.product-card:hover .product-card__actions {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
+}
+
+.product-card__quick-view,
+.product-card__add-cart {
+  white-space: nowrap;
+  background: rgba(255,255,255,0.95) !important;
+  color: var(--color-text-1) !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow: var(--shadow-raised) !important;
+  font-size: 0.75rem !important;
+  padding: var(--space-2) var(--space-4) !important;
+  pointer-events: auto;
+}
+
+.product-card__quick-view:hover,
+.product-card__add-cart:hover {
+  background: var(--color-primary) !important;
+  color: #fff !important;
 }
 
 .product-card__badges {
@@ -478,9 +492,7 @@ ul, ol {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(13,13,13,0.7);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -519,13 +531,14 @@ ul, ol {
 }
 
 .product-card__price {
-  font-family: var(--font-mono);
-  font-size: 0.9375rem;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1rem;
   color: var(--color-primary);
 }
 
 .product-card__price-original {
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: 0.8125rem;
   color: var(--color-text-3);
   text-decoration: line-through;

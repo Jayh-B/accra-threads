@@ -9,10 +9,12 @@ import { useWishlist } from '@/context/WishlistContext';
 import styles from './Navbar.module.css';
 
 const navLinks = [
-  { label: 'Shop', href: '/shop', sub: ['New Arrivals', 'Men', 'Women', 'Accessories', 'Kente Drops'] },
-  { label: 'Lookbook', href: '/lookbook' },
-  { label: 'About', href: '/about' },
-  { label: 'Support', href: '/support' },
+  { label: 'Sale', href: '/shop?cat=sale', color: 'var(--color-accent-red)' },
+  { label: 'Women', href: '/shop?cat=women' },
+  { label: 'Men', href: '/shop?cat=men' },
+  { label: 'Shoes', href: '/shop?cat=shoes' },
+  { label: 'Accessories', href: '/shop?cat=accessories' },
+  { label: 'Kente Drops', href: '/shop?cat=kente' }
 ];
 
 export default function Navbar() {
@@ -41,89 +43,70 @@ export default function Navbar() {
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
-  if (pathname?.startsWith('/admin')) return null;
+  if (pathname?.startsWith('/admin') || pathname === '/login') return null;
 
   return (
     <>
+      <div className={styles.announcementBar}>
+        <p>FREE STANDARD SHIPPING ON ORDERS OVER ₵500 • <b>SHOP NOW</b></p>
+      </div>
       <nav className={`${styles.navbar} ${scrolled ? styles.scrolled : ''}`}>
         <div className={styles.inner}>
-          {/* Logo */}
-          <Link href="/" className={styles.logo}>
-            <span className={styles.logoMark}>AT</span>
-            <span className={styles.logoText}>ACCRA THREADS</span>
-          </Link>
-
-          {/* Desktop Nav */}
-          <ul className={styles.navLinks}>
-            {navLinks.map(link => (
-              <li
-                key={link.label}
-                className={styles.navItem}
-                onMouseEnter={() => link.sub && setActiveDropdown(link.label)}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <Link href={link.href} className={styles.navLink}>
-                  {link.label}
-                  {link.sub && <ChevronDown size={13} strokeWidth={2.5} />}
-                </Link>
-                {link.sub && activeDropdown === link.label && (
-                  <div className={styles.dropdown}>
-                    {link.sub.map(s => (
-                      <Link key={s} href={`/shop?cat=${s.toLowerCase().replace(' ', '-')}`} className={styles.dropItem}>
-                        {s}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-
-          {/* Icons */}
-          <div className={styles.icons}>
-            <button className={styles.iconBtn} onClick={() => setSearchOpen(true)} aria-label="Search">
-              <Search size={20} />
-            </button>
-            <Link href="/account?tab=wishlist" className={styles.iconBtn} aria-label="Wishlist">
-              <Heart size={20} />
-              {wishCount > 0 && <span className={styles.badge}>{wishCount}</span>}
-            </Link>
-            <Link href="/cart" className={styles.iconBtn} aria-label="Cart">
-              <ShoppingBag size={20} />
-              {totalItems > 0 && <span className={`${styles.badge} ${styles.badgeCart}`}>{totalItems}</span>}
-            </Link>
-            <Link href="/account" className={styles.iconBtn} aria-label="Account">
-              <User size={20} />
-            </Link>
+          
+          {/* Top Row */}
+          <div className={styles.topRow}>
+            {/* Mobile Menu Btn (Left on mobile) */}
             <button className={`${styles.iconBtn} ${styles.menuBtn}`} onClick={() => setMobileOpen(true)} aria-label="Menu">
               <Menu size={22} />
             </button>
-          </div>
-        </div>
 
-        {/* Search overlay */}
-        {searchOpen && (
-          <div className={styles.searchBar}>
-            <div className={styles.searchInner}>
-              <Search size={18} className={styles.searchIcon} />
+            {/* Logo */}
+            <Link href="/" className={styles.logo}>
+              <span className={styles.logoMark}>AT</span>
+              <span className={styles.logoText}>ACCRA THREADS</span>
+            </Link>
+
+            {/* Always-on Search */}
+            <div className={styles.searchBarDesk}>
               <input
-                ref={searchRef}
                 type="text"
-                placeholder="Search products, brands, collections..."
+                placeholder="Search products, brands, categories..."
                 value={searchQ}
                 onChange={e => setSearchQ(e.target.value)}
-                className={styles.searchInput}
-                onKeyDown={e => { if (e.key === 'Escape') setSearchOpen(false); }}
+                className={styles.searchInputDesk}
               />
-              <button className={styles.searchClose} onClick={() => setSearchOpen(false)}><X size={18} /></button>
+              <button className={styles.searchBtnDesk}><Search size={18} /></button>
             </div>
-            {searchQ && (
-              <div className={styles.searchResults}>
-                <p className={styles.searchHint}>Press Enter to search for &ldquo;<strong>{searchQ}</strong>&rdquo;</p>
-              </div>
-            )}
+
+            {/* Icons */}
+            <div className={styles.icons}>
+              <Link href="/account?tab=wishlist" className={styles.iconBtn} aria-label="Wishlist">
+                <Heart size={20} />
+                {wishCount > 0 && <span className={styles.badge}>{wishCount}</span>}
+              </Link>
+              <Link href="/cart" className={styles.iconBtn} aria-label="Cart">
+                <ShoppingBag size={20} />
+                {totalItems > 0 && <span className={`${styles.badge} ${styles.badgeCart}`}>{totalItems}</span>}
+              </Link>
+              <Link href="/account" className={styles.iconBtn} aria-label="Account">
+                <User size={20} />
+              </Link>
+            </div>
           </div>
-        )}
+
+          {/* Bottom Row: Desktop Nav */}
+          <div className={styles.bottomRow}>
+            <ul className={styles.navLinks}>
+              {navLinks.map(link => (
+                <li key={link.label} className={styles.navItem}>
+                  <Link href={link.href} className={styles.navLink} style={link.color ? { color: link.color, fontWeight: 700 } : {}}>
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </nav>
 
       {/* Mobile Menu */}
@@ -138,18 +121,9 @@ export default function Navbar() {
             <nav className={styles.mobileNav}>
               {navLinks.map(link => (
                 <div key={link.label}>
-                  <Link href={link.href} className={styles.mobileLink} onClick={() => setMobileOpen(false)}>
+                  <Link href={link.href} className={styles.mobileLink} onClick={() => setMobileOpen(false)} style={link.color ? { color: link.color } : {}}>
                     {link.label}
                   </Link>
-                  {link.sub && (
-                    <div className={styles.mobileSub}>
-                      {link.sub.map(s => (
-                        <Link key={s} href={`/shop?cat=${s.toLowerCase().replace(' ','-')}`} className={styles.mobileSubLink} onClick={() => setMobileOpen(false)}>
-                          {s}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
                 </div>
               ))}
             </nav>

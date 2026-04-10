@@ -1,73 +1,123 @@
-/* Hero */
-.hero {
+/* Promo Banner */
+.promoBanner {
   position: relative;
-  height: calc(100vh - 72px);
-  min-height: 600px;
+  height: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  margin-bottom: var(--space-8);
 }
 
-.heroBg {
+.promoBg {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--color-secondary);
+  background: var(--color-surface-raised);
 }
 
-.heroImg {
+.promoImg {
   object-fit: cover;
   object-position: center 30%;
 }
 
-.heroOverlay {
+.promoOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(13,13,13,0.2) 0%, rgba(13,13,13,0.85) 100%);
+  background: rgba(0,0,0,0.15); /* Much lighter overlay */
 }
 
-.heroContent {
+.promoContent {
   position: relative;
   z-index: 10;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 10vh;
+  background: rgba(255,255,255,0.9);
+  padding: 40px;
+  box-shadow: var(--shadow-raised);
 }
 
-.heroTitle {
-  font-family: var(--font-display);
-  font-size: clamp(3.5rem, 8vw, 6rem);
+@media (max-width: 640px) {
+  .promoContent {
+    padding: 24px;
+    margin: 0 16px;
+    width: calc(100% - 32px);
+  }
+}
+
+.promoTitle {
+  font-family: var(--font-body);
+  font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.1;
   color: var(--color-text-1);
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.promoSub {
+  font-size: clamp(0.875rem, 1.5vw, 1.125rem);
+  color: var(--color-text-2);
   margin-bottom: 24px;
-  text-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  line-height: 1.4;
 }
 
-.heroSub {
-  font-size: clamp(1rem, 2vw, 1.25rem);
-  color: #ddd;
-  max-width: 600px;
-  margin-bottom: 40px;
-  line-height: 1.5;
-}
-
-.heroActions {
+.promoActions {
   display: flex;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 12px;
   justify-content: center;
+}
+
+/* Quick Links */
+.quickLinks {
+  margin-bottom: var(--space-12);
+}
+
+.circleCat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.circleCatImgWrap {
+  position: relative;
+  width: min(80px, 20vw);
+  height: min(80px, 20vw);
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  transition: transform var(--transition-base);
+}
+
+.circleCat:hover .circleCatImgWrap {
+  transform: translateY(-4px);
+  border-color: var(--color-primary);
+}
+
+.circleCatImg {
+  object-fit: cover;
+}
+
+.circleCatLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Grids */
 .productGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
 }
 
 @media (max-width: 1024px) { .productGrid { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
@@ -107,77 +157,34 @@
 .catOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-  padding: 32px;
+  background: rgba(0,0,0,0.1);
+  padding: 24px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  align-items: center;
 }
 
 .catTitle {
-  font-family: var(--font-display);
-  font-size: 1.75rem;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 1.5rem;
   color: #fff;
   margin-bottom: 8px;
-}
-
-.catLink {
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: var(--color-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
 }
 
 /* Lookbook */
 .lookbookCard {
   position: relative;
-  width: 320px;
-  aspect-ratio: 4/5;
+  width: 280px;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--color-surface-raised);
 }
 
-.lbImg { object-fit: cover; }
-.lbContent {
-  position: absolute;
-  inset: 0;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.8) 100%);
+.lookbookCard :global(.product-card) {
+  width: 100%;
 }
-.lbTitle { font-family: var(--font-display); font-size: 1.5rem; color: #fff; }
-
-/* AI Section */
-.aiSection {
-  background: var(--color-surface-raised);
-  padding: 80px 0;
-  border-top: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.aiGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 64px;
-  align-items: center;
-}
-
-@media (max-width: 1024px) { .aiGrid { grid-template-columns: 1fr; gap: 40px; } }
-
-.aiPreview {
-  background: var(--color-surface-dark);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  padding: 32px;
-  box-shadow: var(--shadow-dark-raised);
-}
-
-.aiText { color: var(--color-text-2); line-height: 1.6; font-size: 1.125rem; }
 
 /* Loyalty Section */
 .loyaltySection {
@@ -188,10 +195,11 @@
 .loyaltyInner {
   max-width: 600px;
   margin: 0 auto;
-  border: 1px solid rgba(27, 77, 46, 0.3);
-  padding: 64px 32px;
-  border-radius: 24px;
-  background: radial-gradient(circle at center, rgba(27, 77, 46, 0.1) 0%, transparent 100%);
+  border: 1px solid var(--color-border);
+  padding: 48px 32px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: var(--shadow-raised);
 }
 
 .loyaltyIcon { font-size: 3rem; }

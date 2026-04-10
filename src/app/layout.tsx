@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import MainWrapper from '@/components/layout/MainWrapper';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import ChatFloatBtn from '@/components/support/ChatFloatBtn';
@@ -20,9 +21,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CartProvider>
           <WishlistProvider>
             <Navbar />
-            <main style={{ paddingTop: '72px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <MainWrapper>
               {children}
-            </main>
+            </MainWrapper>
             <Footer />
             <ChatFloatBtn />
           </WishlistProvider>

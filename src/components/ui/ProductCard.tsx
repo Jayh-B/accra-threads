@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
 import { useWishlist } from '@/context/WishlistContext';
+import { useCart } from '@/context/CartContext';
 import type { Product } from '@/lib/data';
 import styles from './ProductCard.module.css';
 
@@ -13,6 +14,7 @@ interface Props {
 
 export default function ProductCard({ product, priority }: Props) {
   const { toggle, isWished } = useWishlist();
+  const { addItem, totalItems } = useCart();
   const wished = isWished(product.id);
 
   return (
@@ -47,9 +49,25 @@ export default function ProductCard({ product, priority }: Props) {
           onClick={e => { e.preventDefault(); toggle({ id: product.id, name: product.name, price: product.price, image: product.images[0], slug: product.slug }); }}
           aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
         >
-          <Heart size={15} fill={wished ? 'currentColor' : 'none'} />
+          <Heart size={15} fill={wished ? 'currentColor' : 'none'} strokeWidth={wished ? 2 : 1.5} />
         </button>
-        <button className={`btn product-card__quick-view`}>Quick View</button>
+        <div className="product-card__actions">
+          <button className="btn product-card__quick-view">Quick View</button>
+          {product.sizes.some(s => s.stock > 0) && (
+            <button 
+              className="btn product-card__add-cart"
+              onClick={e => {
+                e.preventDefault();
+                const defaultSize = product.sizes.find(s => s.stock > 0);
+                if (defaultSize) {
+                  addItem({ id: product.id, name: product.name, price: product.salePrice || product.price, image: product.images[0], size: defaultSize.name, quantity: 1, maxStock: defaultSize.stock });
+                }
+              }}
+            >
+              Add to Bag
+            </button>
+          )}
+        </div>
       </Link>
       <div className="product-card__info">
         <p className="product-card__name">{product.name}</p>

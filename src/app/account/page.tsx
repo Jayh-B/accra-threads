@@ -6,11 +6,23 @@ import { Package, Heart, CreditCard, User, LogOut } from 'lucide-react';
 import { orders } from '@/lib/data';
 import { useWishlist } from '@/context/WishlistContext';
 import styles from './page.module.css';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 export default function AccountPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const resolvedSearchParams = use(searchParams);
   const [tab, setTab] = useState(resolvedSearchParams.tab || 'overview');
   const { items: wishlist } = useWishlist();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      router.push('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -33,7 +45,7 @@ export default function AccountPage({ searchParams }: { searchParams: Promise<{ 
               <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>🐚</span> Cowrie Points
             </button>
             <div className="divider" style={{ margin: '16px 0' }} />
-            <button className={styles.navItem} style={{ color: 'var(--color-accent-red)' }}>
+            <button className={styles.navItem} style={{ color: 'var(--color-accent-red)' }} onClick={handleSignOut}>
               <LogOut size={18} /> Sign Out
             </button>
           </nav>

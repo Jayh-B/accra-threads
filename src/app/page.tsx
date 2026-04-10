@@ -11,18 +11,31 @@ export default async function Home() {
 
   return (
     <>
-      <section className={styles.hero}>
-        <div className={styles.heroBg}>
-          <Image src="/hero_main.png" alt="Accra Threads Hero" fill priority className={styles.heroImg} sizes="100vw" />
-          <div className={styles.heroOverlay} />
+      <section className={styles.promoBanner}>
+        <div className={styles.promoBg}>
+          <Image src="/hero_main.png" alt="Accra Threads New Collection" fill priority className={styles.promoImg} sizes="100vw" />
+          <div className={styles.promoOverlay} />
         </div>
-        <div className={`container ${styles.heroContent}`}>
-          <h1 className={styles.heroTitle}>Wear the City.</h1>
-          <p className={styles.heroSub}>Contemporary streetwear rooted in Kente culture.</p>
-          <div className={styles.heroActions}>
-            <Link href="/shop" className="btn btn-primary btn-lg">Shop New Arrivals</Link>
-            <Link href="/lookbook" className="btn btn-ghost btn-lg">Explore Lookbook</Link>
+        <div className={`container ${styles.promoContent}`}>
+          <h1 className={styles.promoTitle}>SS25 COLLECTION</h1>
+          <p className={styles.promoSub}>Up to 50% Off Selected Styles + Free Delivery across Accra.</p>
+          <div className={styles.promoActions}>
+            <Link href="/shop" className="btn btn-primary btn-lg">Shop Now</Link>
+            <Link href="/shop?cat=sale" className="btn btn-ghost btn-lg">View Sale</Link>
           </div>
+        </div>
+      </section>
+
+      <section className={styles.quickLinks}>
+        <div className="container" style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '16px' }}>
+          {categories.map((c: any) => (
+            <Link key={c.id} href={c.href} className={styles.circleCat}>
+              <div className={styles.circleCatImgWrap}>
+                <Image src={c.image} alt={c.label} fill sizes="120px" className={styles.circleCatImg} />
+              </div>
+              <span className={styles.circleCatLabel}>{c.label}</span>
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -34,17 +47,17 @@ export default async function Home() {
         </div>
       </div>
 
-      <section className="section bg-dark">
+      <section className="section bg-light">
         <div className="container">
           <div className="section-header">
             <div>
-              <h2 className="section-title">Latest Drops</h2>
-              <p className="section-subtitle">The freshest pieces in the city. Grab them before they're gone.</p>
+              <h2 className="section-title">Flash Sale / Trending</h2>
+              <p className="section-subtitle">Snag the latest pieces before they sell out.</p>
             </div>
             <Link href="/shop" className="section-link">View All</Link>
           </div>
           <div className={styles.productGrid}>
-            {newArrivals.map(product => (
+            {newArrivals.slice(0, 5).map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -53,13 +66,16 @@ export default async function Home() {
 
       <section className="section bg-surface">
         <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Shop by Category</h2>
+          </div>
           <div className={styles.catGrid}>
             {categories.map((c: any, i: number) => (
-              <Link key={c.id} href={c.href} className={`${styles.catCard} ${i === 3 ? styles.catCardTall : ''}`}>
+              <Link key={c.id} href={c.href} className={styles.catCard}>
                 <Image src={c.image} alt={c.label} fill sizes="(max-width: 640px) 100vw, 50vw" className={styles.catImg} />
                 <div className={styles.catOverlay}>
                   <h3 className={styles.catTitle}>{c.label}</h3>
-                  <span className={styles.catLink}>Shop Now</span>
+                  <span className="btn btn-primary btn-sm">Shop Now</span>
                 </div>
               </Link>
             ))}
@@ -67,22 +83,18 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="section bg-dark">
+      <section className="section bg-light">
         <div className="container" style={{ paddingRight: 0 }}>
           <div className="section-header" style={{ paddingRight: 'var(--space-20)' }}>
             <div>
-              <h2 className="section-title">Lookbook SS25</h2>
+              <h2 className="section-title">New Arrivals</h2>
             </div>
-            <Link href="/lookbook" className="section-link hide-mobile">Explore Full Story</Link>
+            <Link href="/shop" className="section-link hide-mobile">See All</Link>
           </div>
           <div className="h-scroll">
-            {lookbookItems.map(item => (
-              <div key={item.id} className={styles.lookbookCard}>
-                <Image src={item.image} alt={item.title} fill sizes="300px" className={styles.lbImg} />
-                <div className={styles.lbContent}>
-                  <span className="badge" style={{ backgroundColor: item.color, color: '#fff' }}>{item.label}</span>
-                  <h3 className={styles.lbTitle}>{item.title}</h3>
-                </div>
+            {newArrivals.slice(5).map(product => (
+              <div key={product.id} className={styles.lookbookCard}>
+                <ProductCard product={product} />
               </div>
             ))}
             <div style={{ width: 24, flexShrink: 0 }} />
@@ -90,35 +102,14 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className={styles.aiSection}>
-        <div className="container">
-          <div className={styles.aiGrid}>
-            <div className={styles.aiContent}>
-              <span className="badge badge-feat" style={{ color: 'var(--color-primary)' }}>Powered by Claude</span>
-              <h2 className="section-title" style={{ marginTop: '16px' }}>Meet Your AI Stylist</h2>
-              <p className={styles.aiText}>
-                Not sure what to wear to Detty December? Need sizing advice? Chat with our Accra styling assistant for personalized recommendations based on our current stock and your vibe.
-              </p>
-              <Link href="/support" className="btn btn-secondary btn-md" style={{ marginTop: '24px' }}>Start Styling Session</Link>
-            </div>
-            <div className={styles.aiPreview}>
-              <div className="chat-bubble chat-bubble--user" style={{ animationDelay: '0s' }}>I need an outfit for a wedding in Osu this weekend.</div>
-              <div className="typing-indicator" style={{ marginTop: '16px', marginLeft: 'auto', marginRight: '60px' }}>
-                <div className="typing-dot"></div><div className="typing-dot"></div><div className="typing-dot"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className={styles.loyaltySection}>
         <div className="container text-center">
           <div className={styles.loyaltyInner}>
-            <span className={styles.loyaltyIcon}>🐚</span>
-            <h2 className="section-title" style={{ margin: '16px 0 8px' }}>Cowrie Points</h2>
-            <p className={styles.loyaltySub}>Earn with every purchase. Redeem for exclusive drops.</p>
+            <span className={styles.loyaltyIcon}>✨</span>
+            <h2 className="section-title" style={{ margin: '16px 0 8px' }}>Join Rewards</h2>
+            <p className={styles.loyaltySub}>Sign up now and get 20% off your first order!</p>
             <div className={styles.loyaltyBadges}>
-              <span className="badge badge-cowrie">Join Now for 50 Points</span>
+              <Link href="/account" className="btn btn-primary btn-md">Create Account</Link>
             </div>
           </div>
         </div>
