@@ -60,7 +60,7 @@ export default function ProductCard({ product, priority }: Props) {
                 e.preventDefault();
                 const defaultSize = product.sizes.find(s => s.stock > 0);
                 if (defaultSize) {
-                  addItem({ id: product.id, name: product.name, price: product.salePrice || product.price, image: product.images[0], size: defaultSize.name, quantity: 1, maxStock: defaultSize.stock });
+                  addItem({ id: product.id, name: product.name, price: product.price, originalPrice: product.originalPrice, image: product.images[0], size: defaultSize.label, color: '', qty: 1, slug: product.slug });
                 }
               }}
             >

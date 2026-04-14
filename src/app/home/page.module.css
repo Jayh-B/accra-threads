@@ -1,0 +1,463 @@
+/* ============================================================
+   ACCRA THREADS — Authenticated Homepage Styles
+   Light-mode, warm — contrasts with the dark landing page
+   ============================================================ */
+
+/* ── Welcome Banner ── */
+.welcomeBanner {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2010 50%, #1a1a1a 100%);
+  padding: 40px 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  min-height: 160px;
+  position: relative;
+  overflow: hidden;
+}
+
+.welcomeBanner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/hero_main.png') center 30% / cover no-repeat;
+  opacity: 0.12;
+}
+
+@media (max-width: 1024px) { .welcomeBanner { padding: 32px; } }
+@media (max-width: 640px)  { .welcomeBanner { padding: 24px 16px; } }
+
+.welcomeLeft {
+  position: relative;
+  z-index: 1;
+}
+
+.welcomeGreeting {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #C9A84C;
+  margin-bottom: 6px;
+}
+
+.welcomeTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+
+.welcomeSub {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.cowrieChip {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(201, 168, 76, 0.12);
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  border-radius: 12px;
+  padding: 16px 20px;
+  white-space: nowrap;
+}
+
+.cowrieIcon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.cowrieLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.cowrieValue {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #C9A84C;
+  line-height: 1;
+}
+
+/* ── Quick Action Bar ── */
+.quickBar {
+  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 80px;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.quickBar::-webkit-scrollbar { display: none; }
+
+@media (max-width: 1024px) { .quickBar { padding: 0 32px; } }
+@media (max-width: 640px)  { .quickBar { padding: 0 16px; } }
+
+.quickLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.quickLink:hover {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* ── Flash Sale Hero ── */
+.flashHero {
+  position: relative;
+  height: 420px;
+  overflow: hidden;
+  background: #111;
+  margin-bottom: 0;
+}
+
+@media (max-width: 640px) { .flashHero { height: 280px; } }
+
+.flashHeroImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  opacity: 0.6;
+}
+
+.flashHeroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.2) 70%);
+  display: flex;
+  align-items: center;
+  padding: 0 80px;
+}
+
+@media (max-width: 1024px) { .flashHeroOverlay { padding: 0 32px; } }
+@media (max-width: 640px)  { .flashHeroOverlay { padding: 0 16px; } }
+
+.flashContent {
+  max-width: 480px;
+}
+
+.flashBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #C9A84C;
+  color: #000;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 14px;
+}
+
+.flashTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 3rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.flashSub {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 24px;
+}
+
+.flashActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.flashBtnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #C9A84C;
+  color: #000;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.flashBtnPrimary:hover {
+  background: #E0BE6A;
+  transform: translateY(-1px);
+}
+
+.flashBtnOutline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.04em;
+}
+
+.flashBtnOutline:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ── Section wrapper ── */
+.section {
+  padding: 60px 80px;
+}
+
+@media (max-width: 1024px) { .section { padding: 48px 32px; } }
+@media (max-width: 640px)  { .section { padding: 36px 16px; } }
+
+.sectionBg {
+  background-color: var(--color-surface-light);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 28px;
+}
+
+.sectionTag {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #C9A84C;
+  margin-bottom: 4px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-1);
+  line-height: 1.2;
+}
+
+.sectionLink {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-2);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.sectionLink:hover { color: var(--color-primary); }
+
+/* ── Product Grid ── */
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1280px) { .productGrid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 1024px) { .productGrid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px)  { .productGrid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+
+/* ── Category Circles ── */
+.catScroll {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+
+.catScroll::-webkit-scrollbar { display: none; }
+
+.circleCat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.circleWrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--color-border);
+  transition: all 0.2s;
+}
+
+.circleCat:hover .circleWrap {
+  border-color: #C9A84C;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.circleImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.circleLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-text-1);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+/* ── Scroll row ── */
+.hScroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scrollbar-width: none;
+}
+
+.hScroll::-webkit-scrollbar { display: none; }
+
+.scrollCard {
+  flex-shrink: 0;
+  width: 220px;
+}
+
+/* ── Cowrie Rewards Banner ── */
+.rewardsBanner {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2010 100%);
+  padding: 60px 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1024px) { .rewardsBanner { padding: 48px 32px; } }
+@media (max-width: 640px)  { .rewardsBanner { padding: 36px 16px; } }
+
+.rewardsLeft {
+  max-width: 520px;
+}
+
+.rewardsIcon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.rewardsTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.rewardsSub {
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.6;
+}
+
+.rewardsBadges {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.rewardBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-lg);
+  padding: 14px 20px;
+  color: #fff;
+}
+
+.rewardBadgeIcon { font-size: 1.25rem; }
+
+.rewardBadgeText {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.7);
+}
+
+.rewardBadgeValue {
+  font-weight: 700;
+  color: #C9A84C;
+}
+
+/* ── Loading skeleton ── */
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1024px) { .skeletonGrid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px)  { .skeletonGrid { grid-template-columns: repeat(2, 1fr); } }
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-lg);
+}
+
+.skeletonCard {
+  aspect-ratio: 3/4;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
