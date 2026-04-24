@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Search, Heart, ShoppingBag, User, Menu, X, ChevronDown } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -18,6 +18,7 @@ const navLinks = [
 ];
 
 export default function Navbar() {
+  const router = useRouter();
   const { totalItems } = useCart();
   const { count: wishCount } = useWishlist();
   const pathname = usePathname();
@@ -67,7 +68,15 @@ export default function Navbar() {
             </Link>
 
             {/* Always-on Search */}
-            <div className={styles.searchBarDesk}>
+            <form 
+              className={styles.searchBarDesk} 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (searchQ.trim()) {
+                  router.push(`/shop?q=${encodeURIComponent(searchQ)}`);
+                }
+              }}
+            >
               <input
                 type="text"
                 placeholder="Search products, brands, categories..."
@@ -75,8 +84,8 @@ export default function Navbar() {
                 onChange={e => setSearchQ(e.target.value)}
                 className={styles.searchInputDesk}
               />
-              <button className={styles.searchBtnDesk}><Search size={18} /></button>
-            </div>
+              <button type="submit" className={styles.searchBtnDesk}><Search size={18} /></button>
+            </form>
 
             {/* Icons */}
             <div className={styles.icons}>

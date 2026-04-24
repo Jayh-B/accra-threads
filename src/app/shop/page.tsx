@@ -1,23 +1,27 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import ProductCard from '@/components/ui/ProductCard';
-// import { FilterList } from '@/components/shop/FilterList';
+import { FilterList } from './FilterList';
 import { fetchProducts } from '@/lib/data';
 import styles from './page.module.css';
 
 interface ShopPageProps {
-  searchParams: { cat?: string };
+  searchParams: Promise<{ cat?: string, q?: string }>;
 }
 
-export default async function ShopPage({ searchParams }: ShopPageProps) {
+export default async function ShopPage(props: ShopPageProps) {
+  const searchParams = await props.searchParams;
   const category = searchParams.cat;
-  const productsList = await fetchProducts(category);
+  const q = searchParams.q;
+  const productsList = await fetchProducts(category, q);
 
   return (
     <div className={styles.shopLayout}>
       {/* Desktop Sidebar */}
       <aside className={`${styles.sidebar} hide-mobile`}>
-        {/* <FilterList /> */}
+        <Suspense fallback={<div>Loading filters...</div>}>
+          <FilterList />
+        </Suspense>
       </aside>
 
       <div className={styles.main}>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
@@ -10,7 +10,7 @@ import styles from './page.module.css';
 type Mode = 'login' | 'register';
 type Screen = 'form' | 'verify-email';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') ?? '/home';
@@ -315,5 +315,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className={styles.container}>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

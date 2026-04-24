@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { products } from '@/lib/data';
+import { fetchProducts } from '@/lib/data';
 import styles from '../page.module.css';
 
-export default function AdminProducts() {
+export default async function AdminProducts() {
+  const productsList = await fetchProducts();
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
@@ -27,8 +29,8 @@ export default function AdminProducts() {
               </tr>
             </thead>
             <tbody>
-              {products.map(p => {
-                const totalStock = p.sizes.reduce((sum, s) => sum + s.stock, 0);
+              {productsList.map(p => {
+                const totalStock = p.sizes ? p.sizes.reduce((sum: number, s: any) => sum + s.stock, 0) : 10;
                 const status = totalStock > 0 ? 'Active' : 'Out of Stock';
                 
                 return (
@@ -36,7 +38,7 @@ export default function AdminProducts() {
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         <div style={{ position: 'relative', width: 40, height: 40, borderRadius: 4, overflow: 'hidden', flexShrink: 0 }}>
-                          <Image src={p.images[0]} alt={p.name} fill style={{ objectFit: 'cover' }} sizes="40px" />
+                          <Image src={p.images?.[0] || '/hero-fallback.jpg'} alt={p.name} fill style={{ objectFit: 'cover' }} sizes="40px" />
                         </div>
                         <div>
                           <Link href={`/shop/${p.slug}`} style={{ fontWeight: 500, color: 'var(--color-text)', textDecoration: 'none' }}>
@@ -54,7 +56,7 @@ export default function AdminProducts() {
                     </td>
                     <td>{totalStock} units</td>
                     <td className="font-mono" style={{ textAlign: 'right' }}>
-                      GHS {p.price.toLocaleString()}
+                      GHS {p.price?.toLocaleString()}
                     </td>
                   </tr>
                 );
