@@ -1,65 +1,56 @@
-'use client';
-
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { LayoutDashboard, ShoppingBag, PackageOpen, Users, DollarSign, Bell } from 'lucide-react';
+import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr';
+import { LayoutDashboard, ShoppingBag, PackageOpen, Users, DollarSign, Headphones } from 'lucide-react';
+import { fetchAdminStats, fetchAdminUser } from '@/lib/admin-data';
+import AdminLayoutClient from './AdminLayoutClient';
 import styles from './layout.module.css';
 
 const navItems = [
-  { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { label: 'Orders', href: '/admin/orders', icon: PackageOpen },
-  { label: 'Products', href: '/admin/products', icon: ShoppingBag },
-  { label: 'Customers', href: '/admin/customers', icon: Users },
-  { label: 'Finance & Tax', href: '/admin/finance', icon: DollarSign },
+  { label: 'Dashboard',   href: '/admin',            icon: 'LayoutDashboard' },
+  { label: 'Orders',      href: '/admin/orders',      icon: 'PackageOpen' },
+  { label: 'Products',    href: '/admin/products',    icon: 'ShoppingBag' },
+  { label: 'Customers',   href: '/admin/customers',   icon: 'Users' },
+  { label: 'Finance & Tax', href: '/admin/finance',   icon: 'DollarSign' },
+  { label: 'Support',     href: '/admin/support',     icon: 'Headphones' },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // Get logged-in user
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll(); },
+        setAll() {},
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const [adminProfile, stats] = await Promise.all([
+    user ? fetchAdminUser(user.id) : null,
+    fetchAdminStats(),
+  ]);
+
+  const displayName = adminProfile?.full_name ?? user?.email?.split('@')[0] ?? 'Admin';
+  const initials = displayName
+    .split(' ')
+    .map((w: string) => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
-    <div className={styles.adminContainer}>
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          <div className={styles.logoMark}>AT</div>
-          <span className={styles.logoText}>ADMIN</span>
-        </div>
-        <nav className={styles.nav}>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            // Exact match for dashboard, prefix match for others to keep them active when navigating deeper
-            const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/admin');
-            return (
-              <Link 
-                key={item.href} 
-                href={item.href}
-                className={`${styles.navItem} ${isActive ? styles.active : ''}`}
-              >
-                <Icon size={18} />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-      </aside>
-
-      <div className={styles.mainContent}>
-        <header className={styles.topbar}>
-          <h2 className={styles.topbarTitle}>Accra Threads Store Management</h2>
-          <div className={styles.userProfile}>
-            <button className="btn btn-ghost" style={{ padding: '8px' }}>
-              <Bell size={20} />
-            </button>
-            <div className={styles.avatar}>
-               <Users size={18} />
-            </div>
-            <span>Admin User</span>
-          </div>
-        </header>
-
-        <main className={styles.contentArea}>
-          {children}
-        </main>
-      </div>
-    </div>
+    <AdminLayoutClient
+      navItems={navItems}
+      displayName={displayName}
+      initials={initials}
+      openTickets={stats.openTickets}
+    >
+      {children}
+    </AdminLayoutClient>
   );
 }

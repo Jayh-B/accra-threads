@@ -1,54 +1,101 @@
+import { Users } from 'lucide-react';
+import { fetchAdminCustomers } from '@/lib/admin-data';
 import styles from '../page.module.css';
 
-const MOCK_CUSTOMERS = [
-  { id: 'CUST-001', name: 'Kwame Osei', email: 'kwame.osei@example.com', ltv: 3450, points: 450, status: 'VIP' },
-  { id: 'CUST-002', name: 'Ama Mensah', email: 'ama.m@example.com', ltv: 1200, points: 120, status: 'Active' },
-  { id: 'CUST-003', name: 'David Appiah', email: 'd.appiah@example.com', ltv: 850, points: 85, status: 'Active' },
-  { id: 'CUST-004', name: 'Grace Addo', email: 'grace.addo@example.com', ltv: 0, points: 50, status: 'New' },
-];
+function formatGHS(amount: number) {
+  return `GHS ${(amount ?? 0).toLocaleString('en-GH', { minimumFractionDigits: 2 })}`;
+}
 
-export default function AdminCustomers() {
+function roleBadge(role: string | null) {
+  if (role === 'admin') return { label: 'Admin', cls: styles.statusShipped };
+  if (role === 'supplier') return { label: 'Supplier', cls: styles.statusProcessing };
+  return { label: 'Customer', cls: styles.statusDelivered };
+}
+
+export default async function AdminCustomers() {
+  const customers = await fetchAdminCustomers();
+
   return (
     <div>
-      <h1 className="font-display text-3xl mb-8">CRM & Customers</h1>
+      <div className={styles.pageHeader}>
+        <div>
+          <h1 className={styles.pageTitle}>CRM & Customers</h1>
+          <p className={styles.pageSubtitle}>{customers.length} registered accounts</p>
+        </div>
+      </div>
 
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Customer Directory</h2>
         </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Customer Name</th>
-                <th>Email Address</th>
-                <th>Cowrie Points</th>
-                <th>Status</th>
-                <th style={{ textAlign: 'right' }}>Lifetime Value (LTV)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {MOCK_CUSTOMERS.map(c => (
-                <tr key={c.id}>
-                  <td>
-                    <div style={{ fontWeight: 500 }}>{c.name}</div>
-                    <div className="text-secondary font-mono" style={{ fontSize: '0.75rem', marginTop: '4px' }}>{c.id}</div>
-                  </td>
-                  <td className="text-secondary">{c.email}</td>
-                  <td>{c.points} 🐚</td>
-                  <td>
-                     <span className={`badge ${c.status === 'VIP' ? 'badge-cowrie' : 'badge-new'}`}>
-                      {c.status}
-                    </span>
-                  </td>
-                  <td className="font-mono" style={{ textAlign: 'right' }}>
-                    GHS {c.ltv.toLocaleString()}
-                  </td>
+
+        {customers.length === 0 ? (
+          <div className={styles.emptyState}>
+            <Users size={40} className={styles.emptyIcon} />
+            <p className={styles.emptyTitle}>No customers yet</p>
+            <p className={styles.emptyText}>
+              Registered users will appear here once people sign up on the store.
+            </p>
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Email</th>
+                  <th>Joined</th>
+                  <th>Orders</th>
+                  <th>Cowrie Points 🐚</th>
+                  <th>Role</th>
+                  <th style={{ textAlign: 'right' }}>Lifetime Spend</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {customers.map((c) => {
+                  const badge = roleBadge(c.role);
+                  const name = c.full_name ?? c.email?.split('@')[0] ?? 'Unknown';
+                  const initial = name[0].toUpperCase();
+                  return (
+                    <tr key={c.id}>
+                      <td>
+                        <div className={styles.customerCell}>
+                          <div className={styles.customerInitial}>{initial}</div>
+                          <div>
+                            <div className={styles.customerName}>{name}</div>
+                            <div className={styles.customerEmail} style={{ fontFamily: 'monospace', fontSize: '0.7rem' }}>
+                              {c.id.slice(0, 8)}…
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className={styles.dateCell}>{c.email ?? '—'}</td>
+                      <td className={styles.dateCell}>
+                        {new Date(c.created_at).toLocaleDateString('en-GH', {
+                          day: 'numeric', month: 'short', year: 'numeric',
+                        })}
+                      </td>
+                      <td className={styles.itemCount}>{c.order_count}</td>
+                      <td>
+                        <span style={{ color: '#d4a017', fontWeight: 600 }}>
+                          {(c.loyalty_points ?? 0).toLocaleString()}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`${styles.statusBadge} ${badge.cls}`}>
+                          {badge.label}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <span className={styles.totalCell}>{formatGHS(c.total_spent)}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

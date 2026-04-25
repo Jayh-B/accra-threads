@@ -30,7 +30,6 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          // Write updated auth cookies to both the request and the response
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
@@ -55,16 +54,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // ── Admin route guard ───────────────────────────────────────────────────────
+  if (pathname.startsWith('/admin')) {
+    try {
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile || profile.role !== 'admin') {
+        const homeUrl = new URL('/home', request.url);
+        homeUrl.searchParams.set('error', 'unauthorized');
+        return NextResponse.redirect(homeUrl);
+      }
+    } catch {
+      // If the role check fails for any reason, let the page itself handle it
+      // rather than blocking the user entirely
+      return response;
+    }
+  }
+
   return response;
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all paths EXCEPT:
-     *  - _next/static, _next/image (Next.js internals)
-     *  - favicon.ico, public folder images
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

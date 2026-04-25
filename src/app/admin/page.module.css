@@ -1,83 +1,132 @@
-.dashboardGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-@media (max-width: 1024px) {
-  .dashboardGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboardGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.metricCard {
-  background-color: #0b111a;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 24px;
+/* ── Page Header ─────────────────────────────────────────────────── */
+.pageHeader {
   display: flex;
-  flex-direction: column;
-}
-
-.metricTitle {
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
-  margin-bottom: 8px;
-  display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
+  margin-bottom: 28px;
+  gap: 16px;
 }
 
-.metricValue {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  color: var(--color-text);
-  margin-bottom: 8px;
+.pageTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 6px;
 }
 
-.metricChange {
+.pageSubtitle {
   font-size: 0.875rem;
+  color: rgba(255,255,255,0.4);
+}
+
+/* ── KPI Grid ─────────────────────────────────────────────────────── */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 1200px) {
+  .kpiGrid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .kpiGrid { grid-template-columns: 1fr; }
+}
+
+.kpiCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 20px 22px;
+  transition: border-color 0.2s;
+}
+
+.kpiCard:hover {
+  border-color: rgba(255,255,255,0.12);
+}
+
+.kpiCardAlert {
+  border-color: rgba(239,68,68,0.3);
+  background: rgba(239,68,68,0.04);
+}
+
+.kpiHeader {
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+  margin-bottom: 14px;
 }
 
-.metricChange.positive {
-  color: var(--color-accent-green);
+.kpiLabel {
+  font-size: 0.8125rem;
+  color: rgba(255,255,255,0.45);
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
-.metricChange.negative {
-  color: var(--color-accent-red);
-}
-
-.section {
-  background-color: #0b111a;
-  border: 1px solid var(--color-border);
+.kpiIcon {
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpiIconGold    { background: rgba(212,160,23,0.15); color: #d4a017; }
+.kpiIconBlue    { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.kpiIconPurple  { background: rgba(139,92,246,0.15); color: #a78bfa; }
+.kpiIconRed     { background: rgba(239,68,68,0.15);  color: #f87171; }
+
+.kpiValue {
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.kpiFooter {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.kpiLink {
+  color: #d4a017;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* ── Section ─────────────────────────────────────────────────────── */
+.section {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .sectionHeader {
-  padding: 24px;
-  border-bottom: 1px solid var(--color-border);
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .sectionTitle {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.01em;
 }
 
+/* ── Table ─────────────────────────────────────────────────────────── */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -85,20 +134,376 @@
 
 .table th {
   text-align: left;
-  padding: 16px 24px;
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
-  font-weight: normal;
-  border-bottom: 1px solid var(--color-border);
-  background-color: rgba(255, 255, 255, 0.02);
+  padding: 12px 20px;
+  color: rgba(255,255,255,0.3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.01);
 }
 
 .table td {
-  padding: 16px 24px;
+  padding: 14px 20px;
   vertical-align: middle;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.75);
+  font-size: 0.875rem;
 }
 
 .table tr:last-child td {
   border-bottom: none;
+}
+
+.table tr:hover td {
+  background: rgba(255,255,255,0.02);
+}
+
+.orderId {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8125rem;
+  color: #d4a017;
+  font-weight: 500;
+}
+
+.customerCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.customerInitial {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(212,160,23,0.15);
+  color: #d4a017;
+  font-weight: 700;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.customerName {
+  font-weight: 500;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.875rem;
+}
+
+.customerEmail {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.35);
+  margin-top: 2px;
+}
+
+.dateCell {
+  color: rgba(255,255,255,0.45);
+  font-size: 0.8125rem;
+}
+
+.itemCount {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.8125rem;
+}
+
+.totalCell {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  font-size: 0.875rem;
+}
+
+/* ── Status Badges ─────────────────────────────────────────────────── */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.statusPending    { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+.statusConfirmed  { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); }
+.statusProcessing { background: rgba(139,92,246,0.12); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2); }
+.statusShipped    { background: rgba(20,184,166,0.12); color: #2dd4bf; border: 1px solid rgba(20,184,166,0.2); }
+.statusDelivered  { background: rgba(34,197,94,0.12);  color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+.statusReturned   { background: rgba(249,115,22,0.12); color: #fb923c; border: 1px solid rgba(249,115,22,0.2); }
+.statusCancelled  { background: rgba(239,68,68,0.12);  color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+
+/* ── Empty State ────────────────────────────────────────────────────── */
+.emptyState {
+  padding: 64px 32px;
+  text-align: center;
+}
+
+.emptyIcon {
+  color: rgba(255,255,255,0.1);
+  margin: 0 auto 16px;
+}
+
+.emptyTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 6px;
+}
+
+.emptyText {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.2);
+  max-width: 340px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ── Quick Links ─────────────────────────────────────────────────────── */
+.quickLinks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .quickLinks { grid-template-columns: 1fr; }
+}
+
+.quickCard {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  transition: all 0.18s ease;
+  color: inherit;
+}
+
+.quickCard:hover {
+  border-color: rgba(212,160,23,0.3);
+  background: rgba(212,160,23,0.04);
+}
+
+.quickIcon {
+  color: #d4a017;
+  flex-shrink: 0;
+}
+
+.quickTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 3px;
+}
+
+.quickSub {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.3);
+}
+
+/* ── Orders page specifics ───────────────────────────────────────────── */
+.statusSelect {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.8);
+  font-size: 0.8125rem;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.18s;
+}
+
+.statusSelect:hover,
+.statusSelect:focus {
+  border-color: rgba(212,160,23,0.4);
+  outline: none;
+}
+
+/* ── Products toggles ────────────────────────────────────────────────── */
+.toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.toggleInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleTrack {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: background 0.2s;
+  position: relative;
+}
+
+.toggleInput:checked + .toggleTrack {
+  background: #d4a017;
+  border-color: #d4a017;
+}
+
+.toggleTrack::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+.toggleInput:checked + .toggleTrack::after {
+  transform: translateX(16px);
+}
+
+/* ── Ticket thread ────────────────────────────────────────────────────── */
+.threadWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+}
+
+.message {
+  display: flex;
+  gap: 12px;
+  max-width: 80%;
+}
+
+.messageAdmin {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.messageSender {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.senderCustomer { background: rgba(59,130,246,0.2); color: #60a5fa; }
+.senderAdmin    { background: rgba(212,160,23,0.2); color: #d4a017; }
+
+.messageBubble {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  border-top-left-radius: 4px;
+  padding: 12px 14px;
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.8);
+  line-height: 1.55;
+}
+
+.messageAdmin .messageBubble {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 4px;
+  background: rgba(212,160,23,0.08);
+  border-color: rgba(212,160,23,0.15);
+}
+
+.messageMeta {
+  font-size: 0.6875rem;
+  color: rgba(255,255,255,0.25);
+  margin-top: 4px;
+}
+
+.replyBox {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 20px 24px;
+  display: flex;
+  gap: 12px;
+}
+
+.replyInput {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.85);
+  font-family: inherit;
+  font-size: 0.875rem;
+  padding: 10px 14px;
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+  transition: border-color 0.18s;
+}
+
+.replyInput:focus {
+  border-color: rgba(212,160,23,0.4);
+}
+
+.replyInput::placeholder {
+  color: rgba(255,255,255,0.25);
+}
+
+/* ── Ticket list priority ──────────────────────────────────────────── */
+.priorityHigh   { background: rgba(239,68,68,0.12);  color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+.priorityNormal { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.08); }
+.priorityLow    { background: rgba(34,197,94,0.08);   color: #4ade80; border: 1px solid rgba(34,197,94,0.15); }
+
+/* ── Finance ─────────────────────────────────────────────────────────── */
+.finGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 900px) {
+  .finGrid { grid-template-columns: 1fr; }
+}
+
+.finCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 22px 24px;
+}
+
+.finLabel {
+  font-size: 0.8125rem;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.finValue {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.finSub {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.25);
+  margin-top: 8px;
 }

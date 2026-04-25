@@ -46,11 +46,25 @@ function LoginContent() {
 
     try {
       if (mode === 'login') {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         if (signInError) throw signInError;
+
+        // Check if the user is an admin and redirect accordingly
+        if (signInData.user) {
+          const { data: profile } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', signInData.user.id)
+            .single();
+
+          if (profile?.role === 'admin' && redirectTo === '/home') {
+            router.push('/admin');
+            return;
+          }
+        }
         router.push(redirectTo);
       } else {
         // Register — Supabase will send a verification email automatically
