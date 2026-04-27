@@ -60,7 +60,7 @@ function LoginContent() {
             .eq('id', signInData.user.id)
             .single();
 
-          if (profile?.role === 'admin' && redirectTo === '/home') {
+          if (profile?.role === 'admin') {
             router.push('/admin');
             return;
           }

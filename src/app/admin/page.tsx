@@ -9,7 +9,7 @@ import {
   ShoppingBag,
   Clock,
 } from 'lucide-react';
-import { fetchAdminStats, fetchAdminOrders } from '@/lib/admin-data';
+import { fetchAdminStats, fetchAdminOrders, type AdminOrder } from '@/lib/admin-data';
 import styles from './page.module.css';
 
 function formatGHS(amount: number) {
@@ -30,10 +30,26 @@ function statusClass(status: string) {
 }
 
 export default async function AdminDashboard() {
-  const [stats, recentOrders] = await Promise.all([
-    fetchAdminStats(),
-    fetchAdminOrders(8),
-  ]);
+  let stats = {
+    totalRevenue: 0,
+    totalOrders: 0,
+    totalProducts: 0,
+    totalCustomers: 0,
+    openTickets: 0,
+  };
+  let recentOrders: AdminOrder[] = [];
+
+  try {
+    const [statsResult, ordersResult] = await Promise.all([
+      fetchAdminStats(),
+      fetchAdminOrders(8),
+    ]);
+    stats = statsResult;
+    recentOrders = ordersResult;
+  } catch (error) {
+    console.error('Error loading dashboard data:', error);
+    // Continue with default values
+  }
 
   return (
     <div>

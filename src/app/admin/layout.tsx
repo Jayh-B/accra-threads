@@ -30,10 +30,32 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  const [adminProfile, stats] = await Promise.all([
-    user ? fetchAdminUser(user.id) : null,
-    fetchAdminStats(),
-  ]);
+
+  if (!user) {
+    // This shouldn't happen due to middleware, but just in case
+    return <div>Access denied</div>;
+  }
+
+  let adminProfile = null;
+  let stats = {
+    totalRevenue: 0,
+    totalOrders: 0,
+    totalProducts: 0,
+    totalCustomers: 0,
+    openTickets: 0,
+  };
+
+  try {
+    const [profileResult, statsResult] = await Promise.all([
+      fetchAdminUser(user.id),
+      fetchAdminStats(),
+    ]);
+    adminProfile = profileResult;
+    stats = statsResult;
+  } catch (error) {
+    console.error('Error loading admin data:', error);
+    // Continue with default values
+  }
 
   const displayName = adminProfile?.full_name ?? user?.email?.split('@')[0] ?? 'Admin';
   const initials = displayName
