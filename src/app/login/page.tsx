@@ -54,11 +54,18 @@ function LoginContent() {
 
         // Check if the user is an admin and redirect accordingly
         if (signInData.user) {
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from('users')
             .select('role')
             .eq('id', signInData.user.id)
             .single();
+
+          if (profileError) {
+            console.error('Error fetching user profile:', profileError);
+            // Still continue to home even if profile fetch fails
+            router.push(redirectTo);
+            return;
+          }
 
           if (profile?.role === 'admin') {
             router.push('/admin');
