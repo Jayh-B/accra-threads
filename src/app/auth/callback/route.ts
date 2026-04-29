@@ -32,14 +32,55 @@ export const GET = async (request: NextRequest) => {
       }
     );
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { error, data } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+    if (error) {
+      console.error('❌ Auth callback error:', error);
+      return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
     }
 
-    // On error, redirect back to login with an error param
-    return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
+    // After successful auth, create or verify user profile exists
+    if (data.user) {
+      try {
+        const { data: existingProfile, error: fetchError } = await supabase
+          .from('users')
+          .select('id')
+          .eq('id', data.user.id)
+          .single();
+
+        // If user profile doesn't exist, create it
+        if (fetchError || !existingProfile) {
+          console.log('📝 Creating new user profile for:', data.user.id);
+          const { error: insertError } = await supabase
+            .from('users')
+            .insert([
+              {
+                id: data.user.id,
+                email: data.user.email,
+                full_name: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'User',
+                role: 'customer',
+                loyalty_points: 0,
+              },
+            ]);
+
+          if (insertError) {
+            console.error('⚠️ Error creating user profile:', insertError.message);
+            // Don't fail the auth flow - user will still be authenticated
+          } else {
+            console.log('✅ User profile created successfully');
+          }
+        } else {
+          console.log('✅ User profile already exists');
+        }
+      } catch (err) {
+        console.error('❌ Error in profile creation:', err);
+        // Continue anyway - user is authenticated
+      }
+    }
+
+    // Redirect to next page or home
+    const redirectUrl = new URL(next, origin);
+    return NextResponse.redirect(redirectUrl);
   }
 
   return NextResponse.redirect(`${origin}/login`);

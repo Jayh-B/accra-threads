@@ -1,19 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
-// ── Public routes — no auth required ─────────────────────────────────────────
-const PUBLIC_ROUTES = ['/', '/login', '/admin-login', '/shop', '/lookbook', '/support'];
-const PUBLIC_PREFIXES = ['/shop/', '/auth/', '/_next/', '/favicon', '/api/'];
+// ── Public routes — no auth required ────────────────────────────────────────
+const PUBLIC_ROUTES = ['/', '/login', '/admin-login', '/shop', '/lookbook', '/support', '/home'];
+const PUBLIC_PREFIXES = ['/shop/', '/auth/', '/_next/', '/favicon', '/api/', '/public/'];
+
+// ── Routes that require authentication ──────────────────────────────────────
+const PROTECTED_ROUTES = ['/account', '/cart', '/checkout', '/orders'];
+
+// ── Routes that require admin role ─────────────────────────────────────────
+const ADMIN_ROUTES = ['/admin'];
 
 function isPublicRoute(pathname: string): boolean {
   if (PUBLIC_ROUTES.includes(pathname)) return true;
   return PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
+function isProtectedRoute(pathname: string): boolean {
+  return PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
+}
+
+function isAdminRoute(pathname: string): boolean {
+  return ADMIN_ROUTES.some((route) => pathname.startsWith(route));
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Pass through static assets and public routes immediately
+  // Pass through public routes and static assets immediately
   if (isPublicRoute(pathname)) {
     return NextResponse.next();
   }
@@ -42,44 +56,55 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session — keeps access token valid silently
+  // Get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protected route + no user → redirect to login
-  if (!user) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirectTo', pathname);
-    return NextResponse.redirect(loginUrl);
-  }
+  // ── Admin Route Guard ──────────────────────────────────────────────────────
+  if (isAdminRoute(pathname)) {
+    if (!user) {
+      console.log('🔐 [Middleware] Admin route - no user, redirecting to admin-login');
+      const adminLoginUrl = new URL('/admin-login', request.url);
+      adminLoginUrl.searchParams.set('redirectTo', pathname);
+      return NextResponse.redirect(adminLoginUrl);
+    }
 
-  // ── Admin route guard ───────────────────────────────────────────────────────
-  if (pathname.startsWith('/admin')) {
-    console.log('🔐 [Middleware] Admin route access attempt:', { userId: user.id, pathname });
     try {
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('users')
         .select('role')
         .eq('id', user.id)
         .single();
 
-      console.log('🔐 [Middleware] Profile check:', { profile, role: profile?.role });
-
-      if (!profile || profile.role !== 'admin') {
-        console.log('❌ [Middleware] Access denied - not admin');
+      if (profileError || !profile || profile.role !== 'admin') {
+        console.log('❌ [Middleware] Admin access denied - not an admin');
         const homeUrl = new URL('/home', request.url);
         homeUrl.searchParams.set('error', 'unauthorized');
         return NextResponse.redirect(homeUrl);
       }
-      
-      console.log('✅ [Middleware] Access granted - user is admin');
+
+      console.log('✅ [Middleware] Admin access granted');
     } catch (err) {
-      console.error('❌ [Middleware] Role check error:', err);
-      // If the role check fails for any reason, let the page itself handle it
-      // rather than blocking the user entirely
-      return response;
+      console.error('❌ [Middleware] Admin role check error:', err);
+      const homeUrl = new URL('/home', request.url);
+      homeUrl.searchParams.set('error', 'auth_error');
+      return NextResponse.redirect(homeUrl);
     }
+
+    return response;
+  }
+
+  // ── Protected Routes (require authentication) ───────────────────────────────
+  if (isProtectedRoute(pathname)) {
+    if (!user) {
+      console.log('🔐 [Middleware] Protected route - no user, redirecting to login');
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirectTo', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    console.log('✅ [Middleware] Access to protected route granted');
   }
 
   return response;

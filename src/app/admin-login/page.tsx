@@ -1,19 +1,33 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import styles from '../login/page.module.css';
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // If admin is already authenticated, send them to admin dashboard
+  useEffect(() => {
+    if (authLoading) return; // Wait for auth to load
+
+    if (isAuthenticated && isAdmin) {
+      router.replace('/admin');
+    } else if (isAuthenticated && !isAdmin) {
+      // If user is authenticated but not admin, send them to home
+      router.replace('/home');
+    }
+  }, [isAuthenticated, isAdmin, authLoading, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,6 +37,13 @@ export default function AdminLoginPage() {
     try {
       console.log('🔑 Attempting admin login for:', email);
       
+      // Validate inputs
+      if (!email || !password) {
+        setError('Please fill in all fields');
+        setIsLoading(false);
+        return;
+      }
+      
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -30,6 +51,13 @@ export default function AdminLoginPage() {
       
       if (signInError) {
         console.error('❌ Sign-in error:', signInError);
+        const errorMsg = signInError.message || 'Login failed';
+        
+        if (errorMsg.includes('secret')) {
+          throw new Error('⚠️ Configuration error: Check your Supabase keys in .env.local. See SUPABASE_KEY_FIX.md');
+        } else if (errorMsg.includes('401') || errorMsg.includes('Invalid login credentials')) {
+          throw new Error('Invalid email or password');
+        }
         throw signInError;
       }
 
@@ -57,7 +85,7 @@ export default function AdminLoginPage() {
         console.log('📊 Profile fetch result:', { profile, error: profileError });
 
         if (profileError) {
-          console.error('❌ Profile error:', profileError);
+          console.error('❌ Profile error:', profileError.message);
           setError('Could not verify admin status. Please try again.');
           setIsLoading(false);
           return;
@@ -81,6 +109,23 @@ export default function AdminLoginPage() {
       setError(err.message ?? 'Admin sign-in failed. Please try again.');
       setIsLoading(false);
     }
+  }
+
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.bgImageContainer}>
+          <img src="/accra_fashion_week.png" alt="Accra Fashion Week" className={styles.bgImage} />
+          <div className={styles.overlay} />
+        </div>
+        <div className={styles.formCard}>
+          <div style={{ textAlign: 'center', color: 'var(--color-secondary)' }}>
+            Loading...
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

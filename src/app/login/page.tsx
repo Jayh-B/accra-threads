@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import styles from './page.module.css';
 
@@ -12,6 +13,7 @@ type Screen = 'form' | 'verify-email';
 
 function LoginContent() {
   const router = useRouter();
+  const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') ?? '/home';
   const urlError = searchParams.get('error');
@@ -31,12 +33,18 @@ function LoginContent() {
     urlError === 'auth_callback_failed' ? 'Authentication failed. Please try again.' : null
   );
 
-  // If user already has a session, send them home
+  // If user is already authenticated, redirect appropriately
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) router.replace('/home');
-    });
-  }, [router]);
+    if (authLoading) return; // Wait for auth to load
+
+    if (isAuthenticated) {
+      if (isAdmin) {
+        router.replace('/admin');
+      } else {
+        router.replace(redirectTo);
+      }
+    }
+  }, [isAuthenticated, isAdmin, authLoading, router, redirectTo]);
 
   // ── Email / Password submit ─────────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
@@ -46,11 +54,34 @@ function LoginContent() {
 
     try {
       if (mode === 'login') {
+        console.log('📝 Attempting customer login:', email);
+        
+        // Validate inputs
+        if (!email || !password) {
+          setError('Please fill in all fields');
+          setIsLoading(false);
+          return;
+        }
+
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (signInError) throw signInError;
+        
+        if (signInError) {
+          console.error('❌ Sign-in error:', signInError);
+          const errorMsg = signInError.message || 'Login failed';
+          
+          // Check for common errors
+          if (errorMsg.includes('401') || errorMsg.includes('Invalid login credentials')) {
+            throw new Error('Invalid email or password. Please try again.');
+          } else if (errorMsg.includes('secret')) {
+            throw new Error('⚠️ Configuration error: Check your Supabase keys in .env.local. See SUPABASE_KEY_FIX.md');
+          }
+          throw signInError;
+        }
+
+        console.log('✅ Sign-in successful');
 
         // Check if the user is an admin and redirect accordingly
         if (signInData.user) {
@@ -61,41 +92,75 @@ function LoginContent() {
             .single();
 
           if (profileError) {
-            console.error('Error fetching user profile:', profileError);
+            console.warn('Could not verify user role:', profileError.message);
             // Still continue to home even if profile fetch fails
             router.push(redirectTo);
             return;
           }
 
           if (profile?.role === 'admin') {
+            console.log('👤 User is admin, redirecting to /admin');
             router.push('/admin');
             return;
           }
         }
+        
+        console.log('👥 User is customer, redirecting to:', redirectTo);
         router.push(redirectTo);
       } else {
-        // Register — Supabase will send a verification email automatically
+        // Register
+        console.log('📝 Attempting registration:', email);
+        
+        if (!email || !password || !fullName) {
+          setError('Please fill in all fields');
+          setIsLoading(false);
+          return;
+        }
+
+        if (password.length < 8) {
+          setError('Password must be at least 8 characters');
+          setIsLoading(false);
+          return;
+        }
+        
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: { full_name: fullName },
-            emailRedirectTo: `${location.origin}/auth/callback`,
+            emailRedirectTo: `${location.origin}/auth/callback?next=${redirectTo}`,
           },
         });
-        if (signUpError) throw signUpError;
+        
+        if (signUpError) {
+          console.error('❌ Sign-up error:', signUpError);
+          const errorMsg = signUpError.message || 'Registration failed';
+          
+          if (errorMsg.includes('secret')) {
+            throw new Error('⚠️ Configuration error: Check your Supabase keys in .env.local. See SUPABASE_KEY_FIX.md');
+          } else if (errorMsg.includes('already registered')) {
+            throw new Error('This email is already registered. Please sign in instead.');
+          }
+          throw signUpError;
+        }
+
+        console.log('✅ Registration successful');
 
         // If email confirmation is required, show verify screen
         if (data.session === null) {
+          console.log('📧 Email confirmation required');
           setVerifyEmail(email);
           setScreen('verify-email');
         } else {
           // Email confirmation disabled in Supabase — just log in
+          console.log('📧 No confirmation needed, redirecting to home');
           router.push('/home');
         }
       }
     } catch (err: any) {
-      setError(err.message ?? 'Something went wrong. Please try again.');
+      const errorMessage = err.message ?? 'Something went wrong. Please try again.';
+      console.error('❌ Error:', errorMessage);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -106,6 +171,7 @@ function LoginContent() {
     setError(null);
     setIsLoading(true);
     try {
+      console.log('🔐 Starting Google OAuth');
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -114,9 +180,28 @@ function LoginContent() {
       });
       if (oauthError) throw oauthError;
     } catch (err: any) {
-      setError(err.message ?? 'Google sign-in failed. Please try again.');
+      const errorMessage = err.message ?? 'Google sign-in failed. Please try again.';
+      console.error('❌ OAuth error:', errorMessage);
+      setError(errorMessage);
       setIsLoading(false);
     }
+  }
+
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.bgImageContainer}>
+          <img src="/accra_fashion_week.png" alt="Accra Fashion Week" className={styles.bgImage} />
+          <div className={styles.overlay} />
+        </div>
+        <div className={styles.formCard}>
+          <div style={{ textAlign: 'center', color: 'var(--color-secondary)' }}>
+            Loading...
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // ── Email Verification Screen ───────────────────────────────────────────────
@@ -276,7 +361,7 @@ function LoginContent() {
                   if (!email) { setError('Enter your email above first.'); return; }
                   supabase.auth.resetPasswordForEmail(email, {
                     redirectTo: `${location.origin}/auth/callback`,
-                  }).then(() => setError('Password reset email sent. Check your inbox.'));
+                  }).then(() => setError('Password reset email sent. Check your inbox.')).catch((err) => setError('Error sending reset email.'));
                 }}>
                   Forgot password?
                 </button>
@@ -298,6 +383,61 @@ function LoginContent() {
               <button
                 type="button"
                 className={styles.eyeBtn}
+                onClick={() => setShowPass(!showPass)}
+                aria-label={showPass ? 'Hide password' : 'Show password'}
+              >
+                {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className={styles.submitBtn}
+            disabled={isLoading}
+          >
+            {isLoading
+              ? 'Please wait…'
+              : mode === 'login'
+              ? 'Sign in →'
+              : 'Create account →'}
+          </button>
+        </form>
+
+        <div className={styles.registerWrap}>
+          {mode === 'login' ? (
+            <>Don't have an account?{' '}
+              <button type="button" className={styles.textBtn} onClick={() => { setMode('register'); setError(null); }}>
+                Sign up free
+              </button>
+            </>
+          ) : (
+            <>Already have an account?{' '}
+              <button type="button" className={styles.textBtn} onClick={() => { setMode('login'); setError(null); }}>
+                Sign in
+              </button>
+            </>
+          )}
+        </div>
+
+        <div className={styles.registerWrap}>
+          Need admin access?{' '}
+          <a href="/admin-login" className={styles.textBtn}>
+            Use the admin login
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className={styles.container}>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
+  );
+}
                 onClick={() => setShowPass(!showPass)}
                 aria-label={showPass ? 'Hide password' : 'Show password'}
               >

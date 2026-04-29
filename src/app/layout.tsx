@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import MainWrapper from '@/components/layout/MainWrapper';
+import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 
@@ -15,13 +16,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <CartProvider>
-          <WishlistProvider>
-            <MainWrapper>
-              {children}
-            </MainWrapper>
-          </WishlistProvider>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <MainWrapper>
+                {children}
+              </MainWrapper>
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
