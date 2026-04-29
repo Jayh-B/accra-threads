@@ -4,8 +4,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { fetchAdminTicket, fetchTicketMessages } from '@/lib/admin-data';
-import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
+import { createSupabaseServerClient } from '@/lib/supabaseServer';
 import styles from '../../page.module.css';
 
 async function postReply(formData: FormData) {
@@ -69,12 +68,7 @@ export default async function TicketDetail({ params }: { params: Promise<{ id: s
   const { id } = await params;
 
   // Get current admin user
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll() { return cookieStore.getAll(); }, setAll() {} } }
-  );
+  const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   const [ticket, messages] = await Promise.all([

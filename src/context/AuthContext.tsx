@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { User, Session } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase'
 
 interface UserProfile {
   id: string;
@@ -46,6 +46,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const loadUserProfile = async (userId: string) => {
     try {
       console.log('📂 Loading profile for user:', userId);
+
+      const supabase = getSupabaseBrowserClient();
       
       const { data, error } = await supabase
         .from('users')
@@ -57,7 +59,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // If profile doesn't exist, that's not necessarily fatal
         if (error.code === 'PGRST116') {
           console.log('ℹ️ User profile not found in database (this is OK for new users)');
-          return null;
+          const fallback: UserProfile = { id: userId, role: 'customer' };
+          setProfile(fallback);
+          return fallback;
         }
         console.warn('⚠️ Could not load user profile:', error.message);
         return null;
@@ -81,6 +85,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        if (!isSupabaseConfigured) {
+          setLoading(false);
+          return;
+        }
+
+        const supabase = getSupabaseBrowserClient();
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
         
         if (error) throw error;
@@ -101,6 +111,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initAuth();
 
     // Listen for auth changes
+    if (!isSupabaseConfigured) return;
+
+    const supabase = getSupabaseBrowserClient();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, currentSession) => {
         if (currentSession?.user) {
@@ -123,6 +137,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const handleSignOut = async () => {
     try {
+      if (!isSupabaseConfigured) return;
+      const supabase = getSupabaseBrowserClient();
       await supabase.auth.signOut();
       setUser(null);
       setProfile(null);

@@ -1,15 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase';
 import styles from '../login/page.module.css';
 
-export default function AdminLoginPage() {
+function AdminLoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectToParam = searchParams.get('redirectTo');
+  const redirectTo =
+    redirectToParam && redirectToParam.startsWith('/admin') ? redirectToParam : '/admin';
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,12 +26,12 @@ export default function AdminLoginPage() {
     if (authLoading) return; // Wait for auth to load
 
     if (isAuthenticated && isAdmin) {
-      router.replace('/admin');
+      router.replace(redirectTo);
     } else if (isAuthenticated && !isAdmin) {
       // If user is authenticated but not admin, send them to home
       router.replace('/home');
     }
-  }, [isAuthenticated, isAdmin, authLoading, router]);
+  }, [isAuthenticated, isAdmin, authLoading, router, redirectTo]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,6 +39,7 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
+      const supabase = getSupabaseBrowserClient();
       console.log('🔑 Attempting admin login for:', email);
       
       // Validate inputs
@@ -95,7 +100,7 @@ export default function AdminLoginPage() {
           console.log('✅ Admin role confirmed, navigating to /admin');
           // Simple redirect - let middleware handle the auth check
           setTimeout(() => {
-            router.push('/admin');
+            router.push(redirectTo);
           }, 100);
           return;
         }
@@ -104,9 +109,9 @@ export default function AdminLoginPage() {
         setError('This account is not an administrator. Please use the customer login.');
         setIsLoading(false);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('❌ Login error:', err);
-      setError(err.message ?? 'Admin sign-in failed. Please try again.');
+      setError(err instanceof Error ? err.message : 'Admin sign-in failed. Please try again.');
       setIsLoading(false);
     }
   }
@@ -214,5 +219,13 @@ export default function AdminLoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<div className={styles.container}>Loading...</div>}>
+      <AdminLoginContent />
+    </Suspense>
   );
 }

@@ -245,22 +245,3 @@ export default function AccountPage({ searchParams }: { searchParams: Promise<{ 
     </div>
   );
 }
-                    <td>-</td>
-                    <td style={{ textAlign: 'right', color: 'var(--color-accent-green)' }}>+50</td>
-                  </tr>
-                  <tr>
-                    <td>Feb 14, 2025</td>
-                    <td>Redeemed for discount</td>
-                    <td className="font-mono text-primary">AT-2025-0012</td>
-                    <td style={{ textAlign: 'right', color: 'var(--color-accent-red)' }}>-57</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          )}
-          
-        </div>
-      </div>
-    </div>
-  );
-}

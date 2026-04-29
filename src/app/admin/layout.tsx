@@ -1,10 +1,6 @@
-import Link from 'next/link';
-import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
-import { LayoutDashboard, ShoppingBag, PackageOpen, Users, DollarSign, Headphones } from 'lucide-react';
 import { fetchAdminStats, fetchAdminUser } from '@/lib/admin-data';
+import { createSupabaseServerClient } from '@/lib/supabaseServer';
 import AdminLayoutClient from './AdminLayoutClient';
-import styles from './layout.module.css';
 
 const navItems = [
   { label: 'Dashboard',   href: '/admin',            icon: 'LayoutDashboard' },
@@ -17,17 +13,7 @@ const navItems = [
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // Get logged-in user
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll(); },
-        setAll() {},
-      },
-    }
-  );
+  const supabase = await createSupabaseServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
 

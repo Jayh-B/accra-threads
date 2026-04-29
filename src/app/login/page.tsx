@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
 import styles from './page.module.css';
 
 type Mode = 'login' | 'register';
@@ -53,6 +53,7 @@ function LoginContent() {
     setIsLoading(true);
 
     try {
+      const supabase = getSupabaseBrowserClient();
       if (mode === 'login') {
         console.log('📝 Attempting customer login:', email);
         
@@ -146,6 +147,34 @@ function LoginContent() {
 
         console.log('✅ Registration successful');
 
+        // Best-effort: ensure a profile row exists immediately (helps when email
+        // confirmation is disabled and no /auth/callback runs).
+        if (data.user) {
+          try {
+            const meta = data.user.user_metadata as unknown;
+            const metaFullName =
+              meta && typeof meta === 'object' && 'full_name' in meta
+                ? (meta as { full_name?: unknown }).full_name
+                : undefined;
+            await supabase.from('users').upsert(
+              {
+                id: data.user.id,
+                email: data.user.email,
+                full_name:
+                  (typeof metaFullName === 'string' ? metaFullName : undefined) ||
+                  fullName ||
+                  data.user.email?.split('@')[0] ||
+                  'User',
+                role: 'customer',
+                loyalty_points: 0,
+              },
+              { onConflict: 'id' }
+            );
+          } catch {
+            // Ignore: profile creation is also handled in /auth/callback and/or by DB triggers.
+          }
+        }
+
         // If email confirmation is required, show verify screen
         if (data.session === null) {
           console.log('📧 Email confirmation required');
@@ -157,8 +186,9 @@ function LoginContent() {
           router.push('/home');
         }
       }
-    } catch (err: any) {
-      const errorMessage = err.message ?? 'Something went wrong. Please try again.';
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Something went wrong. Please try again.';
       console.error('❌ Error:', errorMessage);
       setError(errorMessage);
     } finally {
@@ -171,6 +201,7 @@ function LoginContent() {
     setError(null);
     setIsLoading(true);
     try {
+      const supabase = getSupabaseBrowserClient();
       console.log('🔐 Starting Google OAuth');
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -179,8 +210,9 @@ function LoginContent() {
         },
       });
       if (oauthError) throw oauthError;
-    } catch (err: any) {
-      const errorMessage = err.message ?? 'Google sign-in failed. Please try again.';
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Google sign-in failed. Please try again.';
       console.error('❌ OAuth error:', errorMessage);
       setError(errorMessage);
       setIsLoading(false);
@@ -217,11 +249,11 @@ function LoginContent() {
           <div className={styles.verifyIcon}>✉️</div>
           <h1 className={styles.title}>Check your inbox</h1>
           <p className={styles.subtitle}>
-            We've sent a verification link to <strong>{verifyEmail}</strong>.
+            We&apos;ve sent a verification link to <strong>{verifyEmail}</strong>.
             Click the link to activate your account and start shopping.
           </p>
           <p className={styles.verifyNote}>
-            Didn't receive anything? Check your spam folder, or{' '}
+            Didn&apos;t receive anything? Check your spam folder, or{' '}
             <button
               className={styles.textBtn}
               onClick={() => {
@@ -359,9 +391,13 @@ function LoginContent() {
               {mode === 'login' && (
                 <button type="button" className={styles.forgotLink} onClick={() => {
                   if (!email) { setError('Enter your email above first.'); return; }
-                  supabase.auth.resetPasswordForEmail(email, {
+                  if (!isSupabaseConfigured) {
+                    setError('Supabase is not configured. Add your .env.local variables and restart.');
+                    return;
+                  }
+                  getSupabaseBrowserClient().auth.resetPasswordForEmail(email, {
                     redirectTo: `${location.origin}/auth/callback`,
-                  }).then(() => setError('Password reset email sent. Check your inbox.')).catch((err) => setError('Error sending reset email.'));
+                  }).then(() => setError('Password reset email sent. Check your inbox.')).catch(() => setError('Error sending reset email.'));
                 }}>
                   Forgot password?
                 </button>
@@ -383,61 +419,6 @@ function LoginContent() {
               <button
                 type="button"
                 className={styles.eyeBtn}
-                onClick={() => setShowPass(!showPass)}
-                aria-label={showPass ? 'Hide password' : 'Show password'}
-              >
-                {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className={styles.submitBtn}
-            disabled={isLoading}
-          >
-            {isLoading
-              ? 'Please wait…'
-              : mode === 'login'
-              ? 'Sign in →'
-              : 'Create account →'}
-          </button>
-        </form>
-
-        <div className={styles.registerWrap}>
-          {mode === 'login' ? (
-            <>Don't have an account?{' '}
-              <button type="button" className={styles.textBtn} onClick={() => { setMode('register'); setError(null); }}>
-                Sign up free
-              </button>
-            </>
-          ) : (
-            <>Already have an account?{' '}
-              <button type="button" className={styles.textBtn} onClick={() => { setMode('login'); setError(null); }}>
-                Sign in
-              </button>
-            </>
-          )}
-        </div>
-
-        <div className={styles.registerWrap}>
-          Need admin access?{' '}
-          <a href="/admin-login" className={styles.textBtn}>
-            Use the admin login
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<div className={styles.container}>Loading...</div>}>
-      <LoginContent />
-    </Suspense>
-  );
-}
                 onClick={() => setShowPass(!showPass)}
                 aria-label={showPass ? 'Hide password' : 'Show password'}
               >

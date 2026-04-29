@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
 
 export default function AuthDiagnostics() {
   const [status, setStatus] = useState<Record<string, any>>({});
@@ -17,6 +17,21 @@ export default function AuthDiagnostics() {
   useEffect(() => {
     const runDiagnostics = async () => {
       const results: Record<string, any> = {};
+      if (!isSupabaseConfigured) {
+        results.supabaseConnection = {
+          status: '❌ Supabase not configured',
+          error: 'Missing NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY',
+        };
+        results.environmentVars = {
+          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Set' : '❌ Missing',
+          anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Set' : '❌ Missing',
+        };
+        setStatus(results);
+        setLoading(false);
+        return;
+      }
+
+      const supabase = getSupabaseBrowserClient();
 
       // 1. Check Supabase connection
       try {
@@ -25,10 +40,10 @@ export default function AuthDiagnostics() {
           status: session ? '✅ Connected' : '⚠️ No active session',
           session: session ? { user: session.user?.email, expiresAt: session.expires_at } : null,
         };
-      } catch (err: any) {
+      } catch (err: unknown) {
         results.supabaseConnection = {
           status: '❌ Connection failed',
-          error: err.message,
+          error: err instanceof Error ? err.message : String(err),
         };
       }
 
@@ -58,10 +73,10 @@ export default function AuthDiagnostics() {
             rowCount: users?.length || 0,
           };
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         results.usersTable = {
           status: '❌ Error querying table',
-          error: err.message,
+          error: err instanceof Error ? err.message : String(err),
         };
       }
 
@@ -92,10 +107,10 @@ export default function AuthDiagnostics() {
             supabase.auth.admin?.deleteUser(testData.user.id).catch(() => {});
           }
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         results.authEndpoint = {
           status: '❌ Auth test failed',
-          error: err.message,
+          error: err instanceof Error ? err.message : String(err),
         };
       }
 
@@ -117,10 +132,10 @@ export default function AuthDiagnostics() {
             status: 'ℹ️ Not authenticated (can\'t test)',
           };
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         results.rlsPolicies = {
           status: '❌ RLS check failed',
-          error: err.message,
+          error: err instanceof Error ? err.message : String(err),
         };
       }
 

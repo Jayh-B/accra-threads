@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ProductCard from '@/components/ui/ProductCard';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
 import { fetchFeaturedProducts } from '@/lib/data';
 import { categories } from '@/lib/data';
 import type { Product } from '@/lib/data';
@@ -34,7 +34,11 @@ export default function HomePage() {
 
   useEffect(() => {
     // Verify session — middleware handles redirect but this is a UX safety net
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    if (!isSupabaseConfigured) {
+      router.replace('/login');
+      return;
+    }
+    getSupabaseBrowserClient().auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         router.replace('/login');
         return;
