@@ -7,15 +7,21 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 async function makeUserAdmin(email: string) {
   try {
-    // First, get the user by email
-    const { data: authUser, error: authError } = await supabase.auth.admin.getUserByEmail(email);
+    // First, get all users and find by email
+    const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
 
-    if (authError || !authUser.user) {
+    if (authError || !authUsers) {
+      console.log(`Error listing users: ${authError?.message}`);
+      return;
+    }
+
+    const authUser = authUsers.users.find(u => u.email === email);
+    if (!authUser) {
       console.log(`User with email ${email} not found in auth.users`);
       return;
     }
 
-    const userId = authUser.user.id;
+    const userId = authUser.id;
     console.log(`Found user: ${userId}`);
 
     // Update the user's role in the public.users table
@@ -24,8 +30,7 @@ async function makeUserAdmin(email: string) {
       .upsert({
         id: userId,
         role: 'admin',
-        email: email,
-        full_name: authUser.user.user_metadata?.full_name || email.split('@')[0]
+        full_name: authUser.user_metadata?.full_name || email.split('@')[0]
       })
       .select();
 

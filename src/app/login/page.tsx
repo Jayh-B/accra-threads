@@ -293,7 +293,7 @@ function LoginContent() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                autoComplete="current-password"
               />
               <button
                 type="button"
@@ -333,6 +333,13 @@ function LoginContent() {
               </button>
             </>
           )}
+        </div>
+
+        <div className={styles.registerWrap}>
+          Need admin access?{' '}
+          <a href="/admin-login" className={styles.textBtn}>
+            Use the admin login
+          </a>
         </div>
       </div>
     </div>

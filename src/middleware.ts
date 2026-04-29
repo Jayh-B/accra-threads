@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
 // ── Public routes — no auth required ─────────────────────────────────────────
-const PUBLIC_ROUTES = ['/', '/login', '/shop', '/lookbook', '/support'];
+const PUBLIC_ROUTES = ['/', '/login', '/admin-login', '/shop', '/lookbook', '/support'];
 const PUBLIC_PREFIXES = ['/shop/', '/auth/', '/_next/', '/favicon', '/api/'];
 
 function isPublicRoute(pathname: string): boolean {
@@ -56,6 +56,7 @@ export async function middleware(request: NextRequest) {
 
   // ── Admin route guard ───────────────────────────────────────────────────────
   if (pathname.startsWith('/admin')) {
+    console.log('🔐 [Middleware] Admin route access attempt:', { userId: user.id, pathname });
     try {
       const { data: profile } = await supabase
         .from('users')
@@ -63,12 +64,18 @@ export async function middleware(request: NextRequest) {
         .eq('id', user.id)
         .single();
 
+      console.log('🔐 [Middleware] Profile check:', { profile, role: profile?.role });
+
       if (!profile || profile.role !== 'admin') {
+        console.log('❌ [Middleware] Access denied - not admin');
         const homeUrl = new URL('/home', request.url);
         homeUrl.searchParams.set('error', 'unauthorized');
         return NextResponse.redirect(homeUrl);
       }
-    } catch {
+      
+      console.log('✅ [Middleware] Access granted - user is admin');
+    } catch (err) {
+      console.error('❌ [Middleware] Role check error:', err);
       // If the role check fails for any reason, let the page itself handle it
       // rather than blocking the user entirely
       return response;
