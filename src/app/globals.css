@@ -1031,6 +1031,18 @@ ul, ol {
 .shake { animation: shake 400ms ease; }
 
 /* ============================================================
+   SPIN ANIMATION (Loading States)
+   ============================================================ */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================================
    HORIZONTAL SCROLL
    ============================================================ */
 .h-scroll {

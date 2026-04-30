@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import { Package } from 'lucide-react';
+import { Package, RefreshCw } from 'lucide-react';
 import { fetchAdminOrders } from '@/lib/admin-data';
+import { verifyPaymentAndSendConfirmation } from '@/lib/payment-actions';
 import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import styles from '../page.module.css';
@@ -22,9 +22,32 @@ function statusClass(status: string) {
   return map[status] ?? styles.statusPending;
 }
 
+function paymentStatusClass(status: string | null) {
+  const map: Record<string, string> = {
+    paid:       styles.statusDelivered,
+    pending:    styles.statusPending,
+    failed:     styles.statusCancelled,
+    refunded:   styles.statusReturned,
+  };
+  return map[status ?? 'pending'] ?? styles.statusPending;
+}
+
 const ORDER_STATUSES = [
-  'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'returned', 'cancelled',
+  'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'returned', 'cancelled', 'pending_payment',
 ];
+
+async function verifyOrderPayment(formData: FormData) {
+  'use server';
+  const orderId = formData.get('orderId') as string;
+  const reference = formData.get('reference') as string;
+  
+  const result = await verifyPaymentAndSendConfirmation(orderId, reference);
+  
+  if (result.success) {
+    revalidatePath('/admin/orders');
+    revalidatePath('/admin');
+  }
+}
 
 async function updateOrderStatus(formData: FormData) {
   'use server';
@@ -77,8 +100,9 @@ export default async function AdminOrders() {
                   <th>Date</th>
                   <th>Items</th>
                   <th>Status</th>
+                  <th>Payment</th>
                   <th style={{ textAlign: 'right' }}>Total</th>
-                  <th>Update Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -115,28 +139,48 @@ export default async function AdminOrders() {
                         {o.status.replace('_', ' ')}
                       </span>
                     </td>
+                    <td>
+                      <span className={`${styles.statusBadge} ${paymentStatusClass(o.payment_status)}`}>
+                        {(o.payment_status ?? 'pending').replace('_', ' ')}
+                      </span>
+                    </td>
                     <td style={{ textAlign: 'right' }}>
-                      <span className={styles.totalCell}>{formatGHS(o.total ?? 0)}</span>
+                      <span className={styles.totalCell}>{formatGHS((o.total ?? 0) / 100)}</span>
                     </td>
                     <td>
-                      <form action={updateOrderStatus}>
-                        <input type="hidden" name="orderId" value={o.id} />
-                        <select
-                          name="status"
-                          defaultValue={o.status}
-                          className={styles.statusSelect}
-                          onChange={(e) => {
-                            const form = e.target.closest('form') as HTMLFormElement;
-                            form?.requestSubmit();
-                          }}
-                        >
-                          {ORDER_STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {s.charAt(0).toUpperCase() + s.slice(1)}
-                            </option>
-                          ))}
-                        </select>
-                      </form>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <form action={updateOrderStatus} style={{ flex: 1 }}>
+                          <input type="hidden" name="orderId" value={o.id} />
+                          <select
+                            name="status"
+                            defaultValue={o.status}
+                            className={styles.statusSelect}
+                            onChange={(e) => {
+                              const form = e.target.closest('form') as HTMLFormElement;
+                              form?.requestSubmit();
+                            }}
+                          >
+                            {ORDER_STATUSES.map((s) => (
+                              <option key={s} value={s}>
+                                {s.charAt(0).toUpperCase() + s.slice(1)}
+                              </option>
+                            ))}
+                          </select>
+                        </form>
+                        {o.paystack_reference && o.payment_status !== 'paid' && (
+                          <form action={verifyOrderPayment}>
+                            <input type="hidden" name="orderId" value={o.id} />
+                            <input type="hidden" name="reference" value={o.paystack_reference} />
+                            <button 
+                              type="submit" 
+                              className="btn btn-sm btn-ghost"
+                              title="Verify Payment"
+                            >
+                              <RefreshCw size={14} />
+                            </button>
+                          </form>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

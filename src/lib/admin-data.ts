@@ -5,7 +5,7 @@
  */
 import { createClient } from '@supabase/supabase-js';
 
-function getAdminClient() {
+export function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   return createClient(url, serviceKey, {
@@ -21,6 +21,7 @@ export type AdminOrder = {
   id: string;
   created_at: string;
   status: string;
+  payment_status: string | null;
   subtotal: number | null;
   vat_amount: number | null;
   total: number | null;
@@ -28,6 +29,7 @@ export type AdminOrder = {
   customer_name: string | null;
   customer_email: string | null;
   item_count: number;
+  paystack_reference: string | null;
 };
 
 export type AdminCustomer = {
@@ -117,7 +119,7 @@ export async function fetchAdminOrders(limit = 100): Promise<AdminOrder[]> {
   // Fetch orders
   const { data: orders, error } = await db
     .from('orders')
-    .select('id, created_at, status, subtotal, vat_amount, total, user_id')
+    .select('id, created_at, status, payment_status, subtotal, vat_amount, total, user_id, paystack_reference')
     .order('created_at', { ascending: false })
     .limit(limit);
 
@@ -160,6 +162,7 @@ export async function fetchAdminOrders(limit = 100): Promise<AdminOrder[]> {
     id: o.id,
     created_at: o.created_at,
     status: o.status ?? 'pending',
+    payment_status: o.payment_status ?? 'pending',
     subtotal: o.subtotal,
     vat_amount: o.vat_amount,
     total: o.total,
@@ -167,6 +170,7 @@ export async function fetchAdminOrders(limit = 100): Promise<AdminOrder[]> {
     customer_name: o.user_id ? (userMap[o.user_id] ?? 'Unknown') : 'Guest',
     customer_email: o.user_id ? (authEmails[o.user_id] ?? null) : null,
     item_count: countMap[o.id] ?? 0,
+    paystack_reference: o.paystack_reference,
   }));
 }
 

@@ -1,25 +1,52 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Check, ArrowRight, ShieldCheck, ChevronRight } from 'lucide-react';
+import { Check, ArrowRight, ShieldCheck, Loader2 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import { createOrderWithPayment } from '@/lib/payment-actions';
 import styles from './page.module.css';
 
 export default function CheckoutPage() {
-  const { items, subtotal } = useCart();
+  const { items, subtotal, clearCart } = useCart();
+  const { user, profile, isAuthenticated } = useAuth();
+  const router = useRouter();
   const tax = subtotal * 0.15;
-  const delivery = subtotal > 0 ? 50 : 0;
+  const delivery = subtotal > 500 ? 0 : 50; // Free shipping over GHS 500
   const total = subtotal + tax + delivery;
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [orderNumber, setOrderNumber] = useState<string>('');
+  const [error, setError] = useState<string>('');
 
-  // Address
+  // Address form state
   const [useNewAddr, setUseNewAddr] = useState(false);
+  const [firstName, setFirstName] = useState(profile?.full_name?.split(' ')[0] || '');
+  const [lastName, setLastName] = useState(profile?.full_name?.split(' ').slice(1).join(' ') || '');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('Accra');
+  const [region, setRegion] = useState('Greater Accra');
+  const [phone, setPhone] = useState(profile?.phone || '');
+  const [email, setEmail] = useState(user?.email || '');
 
   // Payment
   const [payMethod, setPayMethod] = useState<'card' | 'momo'>('momo');
   const [momoProvider, setMomoProvider] = useState<'mtn' | 'voda' | 'airtel'>('mtn');
+  const [momoNumber, setMomoNumber] = useState('');
+
+  // Update email when user loads
+  useEffect(() => {
+    if (user?.email) setEmail(user.email);
+    if (profile?.full_name) {
+      const parts = profile.full_name.split(' ');
+      setFirstName(parts[0] || '');
+      setLastName(parts.slice(1).join(' ') || '');
+    }
+    if (profile?.phone) setPhone(profile.phone);
+  }, [user, profile]);
 
   if (items.length === 0 && step !== 3) {
     return (
@@ -31,6 +58,64 @@ export default function CheckoutPage() {
       </div>
     );
   }
+
+  const handlePlaceOrder = async () => {
+    setIsProcessing(true);
+    setError('');
+
+    try {
+      const shippingAddress = useNewAddr ? {
+        firstName,
+        lastName,
+        address,
+        city,
+        region,
+        phone,
+      } : {
+        firstName: profile?.full_name?.split(' ')[0] || 'Kofi',
+        lastName: profile?.full_name?.split(' ').slice(1).join(' ') || 'Mensah',
+        address: '14 Oxford Street, Osu',
+        city: 'Accra',
+        region: 'Greater Accra',
+        phone: profile?.phone || '+233 24 123 4567',
+      };
+
+      const result = await createOrderWithPayment({
+        userId: user?.id || null,
+        email,
+        items: items.map(item => ({
+          id: item.id,
+          name: item.name,
+          slug: item.slug,
+          price: item.price,
+          image: item.image,
+          qty: item.qty,
+          size: item.size,
+          color: item.color,
+        })),
+        shippingAddress,
+        paymentMethod: payMethod,
+        momoProvider: payMethod === 'momo' ? momoProvider : undefined,
+      });
+
+      if (result.success && result.paymentUrl) {
+        // Redirect to Paystack for payment
+        clearCart();
+        window.location.href = result.paymentUrl;
+      } else if (result.success) {
+        // No payment URL - something went wrong
+        setOrderNumber(result.orderNumber || '');
+        clearCart();
+        setStep(3);
+      } else {
+        setError(result.error || 'Failed to create order. Please try again.');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -91,34 +176,82 @@ export default function CheckoutPage() {
                   <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                     <div>
                       <label className="input-label">First Name</label>
-                      <input type="text" className="input-field" placeholder="Kofi" />
+                      <input 
+                        type="text" 
+                        className="input-field" 
+                        placeholder="Kofi" 
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                      />
                     </div>
                     <div>
                       <label className="input-label">Last Name</label>
-                      <input type="text" className="input-field" placeholder="Mensah" />
+                      <input 
+                        type="text" 
+                        className="input-field" 
+                        placeholder="Mensah" 
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                      />
                     </div>
                   </div>
                   <div style={{ marginBottom: '16px' }}>
                     <label className="input-label">Address</label>
-                    <input type="text" className="input-field" placeholder="Street address or P.O Box" />
+                    <input 
+                      type="text" 
+                      className="input-field" 
+                      placeholder="Street address or P.O Box" 
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                    />
                   </div>
                   <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                     <div>
                       <label className="input-label">City</label>
-                      <input type="text" className="input-field" placeholder="Accra" />
+                      <input 
+                        type="text" 
+                        className="input-field" 
+                        placeholder="Accra" 
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                      />
                     </div>
                     <div>
                       <label className="input-label">Region</label>
-                      <select className="input-field input-select">
+                      <select 
+                        className="input-field input-select"
+                        value={region}
+                        onChange={(e) => setRegion(e.target.value)}
+                      >
                         <option>Greater Accra</option>
                         <option>Ashanti Region</option>
                         <option>Northern Region</option>
+                        <option>Western Region</option>
+                        <option>Central Region</option>
+                        <option>Eastern Region</option>
+                        <option>Volta Region</option>
                       </select>
                     </div>
                   </div>
                   <div>
                     <label className="input-label">Phone</label>
-                    <input type="tel" className="input-field" placeholder="+233 XX XXX XXXX" />
+                    <input 
+                      type="tel" 
+                      className="input-field" 
+                      placeholder="+233 XX XXX XXXX" 
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ marginTop: '16px' }}>
+                    <label className="input-label">Email</label>
+                    <input 
+                      type="email" 
+                      className="input-field" 
+                      placeholder="your@email.com" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
                   </div>
                 </div>
               )}
@@ -169,7 +302,13 @@ export default function CheckoutPage() {
 
                   <div style={{ marginTop: '24px' }}>
                     <label className="input-label">Mobile Money Number</label>
-                    <input type="tel" className="input-field" placeholder="024 XXX XXXX" />
+                    <input 
+                      type="tel" 
+                      className="input-field" 
+                      placeholder="024 XXX XXXX" 
+                      value={momoNumber}
+                      onChange={(e) => setMomoNumber(e.target.value)}
+                    />
                     <p className={styles.momoHint}>A prompt will be sent to your phone to authorize the payment.</p>
                   </div>
                 </div>
@@ -184,10 +323,30 @@ export default function CheckoutPage() {
                 </div>
               )}
 
+              {error && (
+                <div style={{ 
+                  background: 'rgba(248, 113, 113, 0.1)', 
+                  border: '1px solid rgba(248, 113, 113, 0.3)',
+                  borderRadius: 8,
+                  padding: 12,
+                  marginBottom: 16,
+                  color: '#f87171'
+                }}>
+                  {error}
+                </div>
+              )}
               <div className={styles.payActions}>
-                <button className="btn btn-ghost" onClick={() => setStep(1)}>Back</button>
-                <button className="btn btn-primary btn-lg" onClick={() => setStep(3)}>
-                  Pay GHS {total.toLocaleString()}
+                <button className="btn btn-ghost" onClick={() => setStep(1)} disabled={isProcessing}>Back</button>
+                <button 
+                  className="btn btn-primary btn-lg" 
+                  onClick={handlePlaceOrder}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                    <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Processing...</>
+                  ) : (
+                    <>Pay GHS {total.toLocaleString()}</>
+                  )}
                 </button>
               </div>
             </div>
@@ -199,14 +358,14 @@ export default function CheckoutPage() {
               <div className={styles.successIcon}>✓</div>
               <h2 className="font-display text-4xl" style={{ marginBottom: '16px' }}>Order Confirmed</h2>
               <p className="text-secondary" style={{ marginBottom: '8px' }}>Thank you for shopping with Accra Threads.</p>
-              <p style={{ marginBottom: '32px' }}>Your order number is <strong className="font-mono text-primary">AT-2025-0043</strong></p>
+              <p style={{ marginBottom: '32px' }}>Your order number is <strong className="font-mono text-primary">{orderNumber}</strong></p>
 
               <div className={styles.earnBadge}>
-                🐚 You earned <strong>+120 Cowrie Points</strong> on this order.
+                🐚 You earned <strong>+{Math.floor(total / 10)} Cowrie Points</strong> on this order.
               </div>
 
               <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '48px' }}>
-                <Link href="/orders/AT-2025-0043/track" className="btn btn-primary">Track Order</Link>
+                <Link href={`/orders/${orderNumber}/track`} className="btn btn-primary">Track Order</Link>
                 <Link href="/shop" className="btn btn-secondary">Continue Shopping</Link>
               </div>
             </div>

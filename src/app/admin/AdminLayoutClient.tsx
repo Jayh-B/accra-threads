@@ -11,6 +11,7 @@ import {
   Headphones,
   Bell,
   LogOut,
+  Truck,
 } from 'lucide-react';
 import styles from './layout.module.css';
 
@@ -21,6 +22,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
   Users,
   DollarSign,
   Headphones,
+  Truck,
 };
 
 type NavItem = { label: string; href: string; icon: string };

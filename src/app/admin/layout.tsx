@@ -8,6 +8,7 @@ const navItems = [
   { label: 'Products',    href: '/admin/products',    icon: 'ShoppingBag' },
   { label: 'Customers',   href: '/admin/customers',   icon: 'Users' },
   { label: 'Finance & Tax', href: '/admin/finance',   icon: 'DollarSign' },
+  { label: 'Supply Chain', href: '/admin/supply-chain', icon: 'Truck' },
   { label: 'Support',     href: '/admin/support',     icon: 'Headphones' },
 ];
 

@@ -53,14 +53,12 @@ export default async function AdminProducts() {
           <h1 className={styles.pageTitle}>Product Catalog</h1>
           <p className={styles.pageSubtitle}>{productsList.length} products total</p>
         </div>
-        <a
-          href="https://supabase.com/dashboard/project/jmdqojuxsixtxbavmrwq/editor"
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href="/admin/products/new"
           className="btn btn-primary btn-sm"
         >
-          + Add Product (Supabase)
-        </a>
+          + Add Product
+        </Link>
       </div>
 
       <div className={styles.section}>

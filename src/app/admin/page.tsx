@@ -10,6 +10,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { fetchAdminStats, fetchAdminOrders, type AdminOrder } from '@/lib/admin-data';
+import { SignOutButton } from './components/SignOutButton';
 import styles from './page.module.css';
 
 function formatGHS(amount: number) {
@@ -58,7 +59,10 @@ export default async function AdminDashboard() {
           <h1 className={styles.pageTitle}>Dashboard</h1>
           <p className={styles.pageSubtitle}>Overview of your store performance</p>
         </div>
-        <Link href="/admin/orders" className={`btn btn-primary btn-sm`}>View All Orders</Link>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <Link href="/admin/orders" className={`btn btn-primary btn-sm`}>View All Orders</Link>
+          <SignOutButton />
+        </div>
       </div>
 
       {/* ── KPI Cards ─────────────────────────────────────── */}

@@ -3,7 +3,7 @@
 import React, { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import styles from '../login/page.module.css';
@@ -127,6 +127,63 @@ function AdminLoginContent() {
         <div className={styles.formCard}>
           <div style={{ textAlign: 'center', color: 'var(--color-secondary)' }}>
             Loading...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If already authenticated, show sign-out option
+  if (isAuthenticated) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.bgImageContainer}>
+          <img src="/accra_fashion_week.png" alt="Accra Fashion Week" className={styles.bgImage} />
+          <div className={styles.overlay} />
+        </div>
+
+        <div className={styles.topBar}>
+          <Link href="/" className={styles.backLink}>
+            <ArrowLeft size={16} /> Back to home
+          </Link>
+          <div className={styles.logo}>
+            <User size={20} /> Admin<span>Accra</span>
+          </div>
+        </div>
+
+        <div className={styles.formCard}>
+          <h1 className={styles.title}>Already Signed In</h1>
+          <p className={styles.subtitle}>
+            You are currently signed in as {isAdmin ? 'an administrator' : 'a customer'}.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '24px' }}>
+            {isAdmin ? (
+              <button
+                onClick={() => router.push('/admin')}
+                className="btn btn-primary"
+                style={{ width: '100%' }}
+              >
+                Go to Admin Dashboard
+              </button>
+            ) : (
+              <div className={styles.errorBanner} role="alert">
+                This account does not have admin privileges.
+              </div>
+            )}
+            
+            <button
+              onClick={async () => {
+                const supabase = getSupabaseBrowserClient();
+                await supabase.auth.signOut();
+                window.location.reload();
+              }}
+              className="btn btn-secondary"
+              style={{ width: '100%' }}
+            >
+              <LogOut size={16} style={{ marginRight: '8px' }} />
+              Sign Out
+            </button>
           </div>
         </div>
       </div>

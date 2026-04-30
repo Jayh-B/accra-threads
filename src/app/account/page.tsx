@@ -2,12 +2,20 @@
 import { useState, use, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Package, Heart, CreditCard, User, LogOut } from 'lucide-react';
+import { Package, Heart, CreditCard, User, LogOut, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { orders } from '@/lib/data';
+import { fetchUserOrders, type OrderWithItems } from '@/lib/order-data';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
 import styles from './page.module.css';
+
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString('en-GH', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
 export default function AccountPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const resolvedSearchParams = use(searchParams);
@@ -16,6 +24,8 @@ export default function AccountPage({ searchParams }: { searchParams: Promise<{ 
   const { user, profile, isAuthenticated, loading, signOut } = useAuth();
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [orders, setOrders] = useState<OrderWithItems[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
 
   // Protect this page - redirect if not authenticated
   useEffect(() => {
@@ -23,6 +33,22 @@ export default function AccountPage({ searchParams }: { searchParams: Promise<{ 
       router.replace('/login?redirectTo=/account');
     }
   }, [isAuthenticated, loading, router]);
+
+  // Fetch orders when user is available
+  useEffect(() => {
+    if (user?.id) {
+      setOrdersLoading(true);
+      fetchUserOrders(user.id)
+        .then(data => {
+          setOrders(data);
+          setOrdersLoading(false);
+        })
+        .catch(err => {
+          console.error('Error fetching orders:', err);
+          setOrdersLoading(false);
+        });
+    }
+  }, [user?.id]);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -105,8 +131,8 @@ export default function AccountPage({ searchParams }: { searchParams: Promise<{ 
                     <div key={o.id} className={styles.orderCard}>
                       <div className={styles.orderHeader}>
                         <div>
-                          <span className="font-mono" style={{ color: 'var(--color-primary)', marginRight: '16px' }}>{o.id}</span>
-                          <span className="text-secondary" style={{ fontSize: '0.875rem' }}>{o.date}</span>
+                          <span className="font-mono" style={{ color: 'var(--color-primary)', marginRight: '16px' }}>{o.order_number}</span>
+                          <span className="text-secondary" style={{ fontSize: '0.875rem' }}>{formatDate(o.created_at)}</span>
                         </div>
                         <span className={`badge ${o.status === 'delivered' ? 'badge-cowrie' : 'badge-new'}`}>
                           {o.status}
@@ -116,13 +142,13 @@ export default function AccountPage({ searchParams }: { searchParams: Promise<{ 
                         <div className={styles.orderImgs}>
                           {o.items.slice(0, 3).map((item, i) => (
                              <div key={i} className={styles.orderImgWrap}>
-                               <Image src={item.image} alt={item.name} fill className={styles.orderImg} />
+                               <Image src={item.image || '/products/placeholder.jpg'} alt={item.product_name} fill className={styles.orderImg} />
                              </div>
                           ))}
                         </div>
                         <div className={styles.orderActions}>
-                          <span className="font-mono text-lg">GHS {o.total.toLocaleString()}</span>
-                          <Link href={`/orders/${o.id}/track`} className="btn btn-secondary btn-sm">Track Order</Link>
+                          <span className="font-mono text-lg">GHS {Math.round(o.total).toLocaleString()}</span>
+                          <Link href={`/orders/${o.order_number}`} className="btn btn-secondary btn-sm">Track Order</Link>
                         </div>
                       </div>
                     </div>
@@ -160,15 +186,20 @@ export default function AccountPage({ searchParams }: { searchParams: Promise<{ 
             <div className="page-enter">
               <h2 className="text-2xl" style={{ marginBottom: '24px' }}>Order History</h2>
               <div className={styles.orderList}>
-                {orders.length === 0 ? (
+                {ordersLoading ? (
+                  <div style={{ textAlign: 'center', padding: 40 }}>
+                    <Loader2 size={32} className="spin" style={{ margin: '0 auto 16px' }} />
+                    <p className="text-secondary">Loading orders...</p>
+                  </div>
+                ) : orders.length === 0 ? (
                   <p className="text-secondary">No orders yet. <Link href="/shop">Start shopping!</Link></p>
                 ) : (
                   orders.map(o => (
                     <div key={o.id} className={styles.orderCard}>
                        <div className={styles.orderHeader}>
                         <div>
-                          <span className="font-mono" style={{ color: 'var(--color-primary)', marginRight: '16px' }}>{o.id}</span>
-                          <span className="text-secondary" style={{ fontSize: '0.875rem' }}>{o.date}</span>
+                          <span className="font-mono" style={{ color: 'var(--color-primary)', marginRight: '16px' }}>{o.order_number}</span>
+                          <span className="text-secondary" style={{ fontSize: '0.875rem' }}>{formatDate(o.created_at)}</span>
                         </div>
                         <span className={`badge ${o.status === 'delivered' ? 'badge-cowrie' : 'badge-new'}`}>
                           {o.status}
@@ -179,20 +210,21 @@ export default function AccountPage({ searchParams }: { searchParams: Promise<{ 
                           {o.items.map((item, i) => (
                              <div key={i} className={styles.orderItemRow}>
                                 <div className={styles.orderImgWrap} style={{ width: 48, borderRadius: 4 }}>
-                                  <Image src={item.image} alt={item.name} fill className={styles.orderImg} />
+                                  <Image src={item.image || '/products/placeholder.jpg'} alt={item.product_name} fill className={styles.orderImg} />
                                 </div>
                                 <div style={{ flex: 1, fontSize: '0.875rem' }}>
-                                  <p>{item.name}</p>
-                                  <p className="text-secondary" style={{ fontSize: '0.75rem' }}>Qty: {item.qty}</p>
+                                  <p>{item.product_name}</p>
+                                  <p className="text-secondary" style={{ fontSize: '0.75rem' }}>Qty: {item.quantity}</p>
                                 </div>
-                                <span className="font-mono" style={{ fontSize: '0.875rem' }}>GHS {item.price.toLocaleString()}</span>
+                                <span className="font-mono" style={{ fontSize: '0.875rem' }}>GHS {Math.round(item.total_price).toLocaleString()}</span>
                              </div>
                           ))}
                         </div>
                       </div>
                       <div style={{ padding: '16px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                         <span className="font-mono text-lg">Total: GHS {o.total.toLocaleString()}</span>
-                         <Link href={`/orders/${o.id}/track`} className="btn btn-secondary btn-sm">Track Package</Link>
+                         <span className="font-mono text-lg">{o.items.length} items</span>
+                         <span className="font-mono text-lg">Total: GHS {Math.round(o.total).toLocaleString()}</span>
+                         <Link href={`/orders/${o.order_number}`} className="btn btn-secondary btn-sm">Track Package</Link>
                       </div>
                     </div>
                   ))
@@ -220,7 +252,13 @@ export default function AccountPage({ searchParams }: { searchParams: Promise<{ 
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.length === 0 ? (
+                  {ordersLoading ? (
+                    <tr>
+                      <td colSpan={4} style={{ textAlign: 'center', padding: '32px' }}>
+                        <Loader2 size={24} className="spin" style={{ margin: '0 auto' }} />
+                      </td>
+                    </tr>
+                  ) : orders.length === 0 ? (
                     <tr>
                       <td colSpan={4} style={{ textAlign: 'center', padding: '32px', color: 'var(--color-secondary)' }}>
                         No points earned yet. <Link href="/shop">Make your first purchase!</Link>
@@ -229,9 +267,9 @@ export default function AccountPage({ searchParams }: { searchParams: Promise<{ 
                   ) : (
                     orders.slice(0, 5).map((o, i) => (
                       <tr key={i}>
-                        <td>{o.date}</td>
+                        <td>{formatDate(o.created_at)}</td>
                         <td>Earned from purchase</td>
-                        <td className="font-mono text-primary">{o.id}</td>
+                        <td className="font-mono text-primary">{o.order_number}</td>
                         <td style={{ textAlign: 'right', color: 'var(--color-accent-green)' }}>+{Math.floor(o.total / 10)}</td>
                       </tr>
                     ))
