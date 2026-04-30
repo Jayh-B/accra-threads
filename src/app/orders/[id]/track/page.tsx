@@ -1,16 +1,52 @@
 'use client';
 
-import { use } from 'react';
+import { use, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Package, Truck, CheckCircle2, ChevronRight } from 'lucide-react';
-import { orders } from '@/lib/data';
+import { Package, Truck, CheckCircle2, ChevronRight, FileText } from 'lucide-react';
+import { getOrderById } from '@/lib/order-data';
+import { getInvoiceByOrderId } from '@/lib/invoice-actions';
 import styles from './page.module.css';
+
+import { OrderWithItems } from '@/lib/order-data';
+
+type Order = OrderWithItems;
 
 export default function TrackOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const order = orders.find(o => o.id === id);
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [hasInvoice, setHasInvoice] = useState(false);
+
+  useEffect(() => {
+    async function loadOrder() {
+      try {
+        const orderData = await getOrderById(id);
+        if (orderData) {
+          setOrder(orderData);
+          // Check if invoice exists
+          const invoiceResult = await getInvoiceByOrderId(id);
+          setHasInvoice(invoiceResult.success);
+        }
+      } catch (error) {
+        console.error('Error loading order:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadOrder();
+  }, [id]);
   
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <div style={{ textAlign: 'center', padding: '100px 20px' }}>
+          <p className="text-secondary">Loading order...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!order) {
     return (
       <div className={styles.page}>
@@ -40,9 +76,19 @@ export default function TrackOrderPage({ params }: { params: Promise<{ id: strin
       <div className={styles.header}>
         <div>
           <h1 className="font-display text-3xl">Track Package</h1>
-          <p className="text-secondary mt-2">Order {order.id}</p>
+          <p className="text-secondary mt-2">Order {order.order_number || order.id.slice(0, 8)}</p>
         </div>
-        <div>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {hasInvoice && (
+            <Link 
+              href={`/account/orders/${order.id}/invoice`}
+              className="btn btn-secondary"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <FileText size={16} />
+              View Invoice
+            </Link>
+          )}
            {order.status === 'delivered' ? (
              <span className="badge badge-cowrie text-sm px-4 py-2">Delivered</span>
            ) : (
@@ -66,7 +112,7 @@ export default function TrackOrderPage({ params }: { params: Promise<{ id: strin
                   <div className={styles.iconWrap}><Package size={20} /></div>
                   <div className={styles.nodeLabels}>
                     <p className={styles.nodeTitle}>Processing</p>
-                    <p className={styles.nodeTime}>{order.date}</p>
+                    <p className={styles.nodeTime}>{new Date(order.created_at).toLocaleDateString()}</p>
                   </div>
                 </div>
 
@@ -101,10 +147,10 @@ export default function TrackOrderPage({ params }: { params: Promise<{ id: strin
             <div className={styles.deliveryDetails}>
               <h3 className="text-lg mb-4">Delivery Address</h3>
               <p className="text-secondary text-sm leading-relaxed">
-                Kofi Mensah<br/>
-                14 Oxford Street, Osu<br/>
-                Accra, Greater Accra<br/>
-                +233 24 123 4567
+                {order.shipping_address?.first_name} {order.shipping_address?.last_name}<br/>
+                {order.shipping_address?.address}<br/>
+                {order.shipping_address?.city}{order.shipping_address?.city && order.shipping_address?.region && ', '} {order.shipping_address?.region}<br/>
+                {order.shipping_address?.phone}
               </p>
             </div>
           </div>
@@ -115,15 +161,15 @@ export default function TrackOrderPage({ params }: { params: Promise<{ id: strin
            <div className={styles.orderSummary}>
              <h3 className="text-lg mb-6">Order Items</h3>
              <div className={styles.itemsList}>
-               {order.items.map((item, i) => (
+               {(order.items || []).map((item, i) => (
                  <div key={i} className={styles.itemRow}>
                    <div className={styles.itemImgWrap}>
-                     <Image src={item.image} alt={item.name} fill className={styles.itemImg} />
+                     <Image src={item.image || '/products/placeholder.jpg'} alt={item.product_name} fill className={styles.itemImg} />
                    </div>
                    <div className={styles.itemInfo}>
-                     <span className={styles.itemName}>{item.name}</span>
-                     <p className={styles.itemMeta}>Qty: {item.qty}</p>
-                     <p className={styles.itemPrice}>GHS {item.price.toLocaleString()}</p>
+                     <span className={styles.itemName}>{item.product_name}</span>
+                     <p className={styles.itemMeta}>Qty: {item.quantity}</p>
+                     <p className={styles.itemPrice}>GHS {item.total_price.toLocaleString()}</p>
                    </div>
                  </div>
                ))}
@@ -131,8 +177,9 @@ export default function TrackOrderPage({ params }: { params: Promise<{ id: strin
 
              <div className="divider" style={{ margin: '24px 0' }} />
 
-             <div className={styles.sumRow}><span>Subtotal</span><span className="font-mono">GHS {(order.total - 50).toLocaleString()}</span></div>
-             <div className={styles.sumRow}><span>Delivery</span><span className="font-mono">GHS 50</span></div>
+             <div className={styles.sumRow}><span>Subtotal</span><span className="font-mono">GHS {order.subtotal.toLocaleString()}</span></div>
+             <div className={styles.sumRow}><span>VAT (15%)</span><span className="font-mono">GHS {order.vat_amount.toLocaleString()}</span></div>
+             <div className={styles.sumRow}><span>Delivery</span><span className="font-mono">{order.shipping_cost === 0 ? 'FREE' : `GHS ${order.shipping_cost.toLocaleString()}`}</span></div>
              <div className="divider" style={{ margin: '16px 0' }} />
              <div className={`${styles.sumRow} ${styles.sumTotalRow}`}><span>Total</span><span className="font-mono text-primary">GHS {order.total.toLocaleString()}</span></div>
            </div>

@@ -148,6 +148,44 @@ export async function sendCancellationNotification(
   }
 }
 
+/**
+ * Send invoice email to customer
+ */
+export async function sendInvoiceEmail(
+  invoiceData: {
+    invoiceNumber: string;
+    orderNumber: string;
+    customerEmail: string;
+    customerName: string;
+    total: number;
+    items: Array<{
+      name: string;
+      quantity: number;
+      price: number;
+    }>;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await resend.emails.send({
+      from: `Accra Threads <${FROM_EMAIL}>`,
+      to: invoiceData.customerEmail,
+      subject: `Invoice #${invoiceData.invoiceNumber} - Accra Threads`,
+      html: generateInvoiceEmailHtml(invoiceData),
+    });
+
+    if (error) {
+      console.error('Failed to send invoice email:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log(`[EMAIL] ✅ Invoice email sent to ${invoiceData.customerEmail}`);
+    return { success: true };
+  } catch (err) {
+    console.error('Email error:', err);
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to send email' };
+  }
+}
+
 function generateOrderConfirmationHtml(data: OrderEmailData): string {
   const itemsHtml = data.items.map(item => `
     <tr>
@@ -273,6 +311,72 @@ function generateShippingHtml(data: OrderEmailData): string {
       ${data.estimatedDelivery ? `<p>Estimated Delivery: <strong>${data.estimatedDelivery}</strong></p>` : ''}
       
       <p>Thank you for shopping with Accra Threads!</p>
+    </div>
+  `;
+}
+
+function generateInvoiceEmailHtml(data: {
+  invoiceNumber: string;
+  orderNumber: string;
+  customerName: string;
+  total: number;
+  items: Array<{ name: string; quantity: number; price: number }>;
+}): string {
+  const itemsHtml = data.items.map(item => `
+    <tr>
+      <td style="padding: 12px; border-bottom: 1px solid #eee;">${item.name}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">GHS ${(item.price / 100).toLocaleString()}</td>
+    </tr>
+  `).join('');
+
+  return `
+    <div style="font-family: 'DM Sans', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #222;">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <h1 style="color: #2c5f2d; margin: 0;">ACCRA THREADS</h1>
+        <p style="color: #666; margin: 8px 0 0;">Premium Streetwear from Ghana</p>
+      </div>
+      
+      <h2 style="color: #222; border-bottom: 2px solid #2c5f2d; padding-bottom: 8px;">Invoice #${data.invoiceNumber}</h2>
+      
+      <p>Hi ${data.customerName},</p>
+      <p>Thank you for your purchase! Please find your invoice details below:</p>
+      
+      <div style="background: #f7f7f7; padding: 16px; border-radius: 8px; margin: 24px 0;">
+        <p style="margin: 0 0 8px;"><strong>Order Number:</strong> #${data.orderNumber}</p>
+        <p style="margin: 0;"><strong>Invoice Number:</strong> ${data.invoiceNumber}</p>
+      </div>
+      
+      <table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
+        <thead>
+          <tr style="background: #f7f7f7;">
+            <th style="padding: 12px; text-align: left;">Item</th>
+            <th style="padding: 12px; text-align: center;">Qty</th>
+            <th style="padding: 12px; text-align: right;">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemsHtml}
+        </tbody>
+      </table>
+      
+      <div style="background: #f7f7f7; padding: 16px; border-radius: 8px; text-align: right;">
+        <p style="margin: 0; font-size: 18px; font-weight: 600;">
+          Total: GHS ${(data.total / 100).toLocaleString()}
+        </p>
+      </div>
+      
+      <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #eee; text-align: center;">
+        <p style="margin: 0 0 16px;">You can download your full invoice PDF from your account:</p>
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://accrathreads.com'}/account/orders" 
+           style="display: inline-block; padding: 12px 24px; background: #2c5f2d; color: white; text-decoration: none; border-radius: 4px; font-weight: 500;">
+          View Orders
+        </a>
+      </div>
+      
+      <p style="color: #999; font-size: 12px; text-align: center; margin-top: 32px;">
+        If you have any questions about this invoice, please contact us at support@accrathreads.com
+      </p>
     </div>
   `;
 }

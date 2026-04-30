@@ -1,5 +1,7 @@
-import { DollarSign, Landmark, TrendingUp, FileText } from 'lucide-react';
+import { DollarSign, Landmark, TrendingUp, FileText, Receipt, ArrowRight } from 'lucide-react';
 import { fetchAdminFinance } from '@/lib/admin-data';
+import { fetchAllInvoices } from '@/lib/invoice-actions';
+import Link from 'next/link';
 import styles from '../page.module.css';
 
 function formatGHS(amount: number) {
@@ -21,6 +23,12 @@ function statusClass(status: string) {
 
 export default async function AdminFinance() {
   const { grossRevenue, vatCollected, netRevenue, orders } = await fetchAdminFinance();
+  const invoices = await fetchAllInvoices(100);
+
+  // Calculate invoice stats
+  const totalInvoiced = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+  const paidInvoices = invoices.filter((inv) => inv.payment_status === 'paid');
+  const pendingInvoices = invoices.filter((inv) => inv.payment_status === 'pending');
 
   return (
     <div>
@@ -62,6 +70,56 @@ export default async function AdminFinance() {
             {formatGHS(netRevenue)}
           </div>
           <div className={styles.finSub}>After tax liabilities</div>
+        </div>
+      </div>
+
+      {/* ── Invoices Section ───────────────────────────────── */}
+      <div className={styles.section} style={{ marginBottom: 24 }}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Invoice Management</h2>
+          <Link 
+            href="/admin/finance/invoices" 
+            className="btn btn-primary btn-sm"
+            style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+          >
+            <Receipt size={16} />
+            View All Invoices
+            <ArrowRight size={14} />
+          </Link>
+        </div>
+        <div style={{ padding: '20px 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+          <div>
+            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', marginBottom: 4, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              Total Invoices
+            </div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 600, color: 'rgba(255,255,255,0.9)' }}>
+              {invoices.length}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', marginBottom: 4, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              Total Invoiced
+            </div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 600, color: '#4ade80' }}>
+              {formatGHS(totalInvoiced)}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', marginBottom: 4, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              Paid Invoices
+            </div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 600, color: '#60a5fa' }}>
+              {paidInvoices.length}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', marginBottom: 4, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              Pending Payment
+            </div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 600, color: '#fbbf24' }}>
+              {pendingInvoices.length}
+            </div>
+          </div>
         </div>
       </div>
 
