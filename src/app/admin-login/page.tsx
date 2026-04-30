@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { getSupabaseBrowserClient } from '@/lib/supabase';
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
 import styles from '../login/page.module.css';
 
 function AdminLoginContent() {
@@ -116,7 +116,7 @@ function AdminLoginContent() {
     }
   }
 
-  // Show loading while auth is initializing
+  // If still loading auth state, show loading spinner
   if (authLoading) {
     return (
       <div className={styles.container}>
@@ -124,10 +124,43 @@ function AdminLoginContent() {
           <img src="/accra_fashion_week.png" alt="Accra Fashion Week" className={styles.bgImage} />
           <div className={styles.overlay} />
         </div>
-        <div className={styles.formCard}>
-          <div style={{ textAlign: 'center', color: 'var(--color-secondary)' }}>
-            Loading...
+        <div className={styles.formCard} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+          <div>Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if Supabase is configured
+  if (!isSupabaseConfigured) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.bgImageContainer}>
+          <img src="/accra_fashion_week.png" alt="Accra Fashion Week" className={styles.bgImage} />
+          <div className={styles.overlay} />
+        </div>
+
+        <div className={styles.topBar}>
+          <Link href="/" className={styles.backLink}>
+            <ArrowLeft size={16} /> Back to home
+          </Link>
+          <div className={styles.logo}>
+            <User size={20} /> Admin<span>Accra</span>
           </div>
+        </div>
+
+        <div className={styles.formCard}>
+          <h1 className={styles.title}>Configuration Error</h1>
+          <p className={styles.subtitle}>
+            Supabase is not configured. Please check your environment variables.
+          </p>
+          <div className={styles.errorBanner} role="alert">
+            Missing: NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY
+          </div>
+          <p style={{ marginTop: '16px', fontSize: '14px', color: '#666' }}>
+            1. Add these to your <code>.env.local</code> file<br/>
+            2. Restart the dev server (Ctrl+C, then npm run dev)
+          </p>
         </div>
       </div>
     );
@@ -279,9 +312,23 @@ function AdminLoginContent() {
   );
 }
 
+function AdminLoginFallback() {
+  return (
+    <div className={styles.container}>
+      <div className={styles.bgImageContainer}>
+        <img src="/accra_fashion_week.png" alt="Accra Fashion Week" className={styles.bgImage} />
+        <div className={styles.overlay} />
+      </div>
+      <div className={styles.formCard} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+        <div>Loading...</div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={<div className={styles.container}>Loading...</div>}>
+    <Suspense fallback={<AdminLoginFallback />}>
       <AdminLoginContent />
     </Suspense>
   );

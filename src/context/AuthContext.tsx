@@ -113,25 +113,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Listen for auth changes
     if (!isSupabaseConfigured) return;
 
-    const supabase = getSupabaseBrowserClient();
+    let subscription: { unsubscribe: () => void } | null = null;
+    
+    try {
+      const supabase = getSupabaseBrowserClient();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, currentSession) => {
-        if (currentSession?.user) {
-          setSession(currentSession);
-          setUser(currentSession.user);
-          await loadUserProfile(currentSession.user.id);
-        } else {
-          setSession(null);
-          setUser(null);
-          setProfile(null);
+      const { data: { subscription: sub } } = supabase.auth.onAuthStateChange(
+        async (_event, currentSession) => {
+          if (currentSession?.user) {
+            setSession(currentSession);
+            setUser(currentSession.user);
+            await loadUserProfile(currentSession.user.id);
+          } else {
+            setSession(null);
+            setUser(null);
+            setProfile(null);
+          }
+          setLoading(false);
         }
-        setLoading(false);
-      }
-    );
+      );
+      
+      subscription = sub;
+    } catch (err) {
+      console.error('Error setting up auth listener:', err);
+      setLoading(false);
+    }
 
     return () => {
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 
