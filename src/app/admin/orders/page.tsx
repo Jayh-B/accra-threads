@@ -1,4 +1,4 @@
-import { Package, RefreshCw } from 'lucide-react';
+import { Package, RefreshCw, Truck } from 'lucide-react';
 import { fetchAdminOrders } from '@/lib/admin-data';
 import { verifyPaymentAndSendConfirmation } from '@/lib/payment-actions';
 import { createClient } from '@supabase/supabase-js';
@@ -167,6 +167,15 @@ export default async function AdminOrders() {
                             ))}
                           </select>
                         </form>
+                        <a
+                          href={`/admin/orders/${o.id}/delivery`}
+                          className="btn btn-sm btn-secondary"
+                          title="Manage Delivery"
+                          style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                        >
+                          <Truck size={14} />
+                          Delivery
+                        </a>
                         {o.paystack_reference && o.payment_status !== 'paid' && (
                           <form action={verifyOrderPayment}>
                             <input type="hidden" name="orderId" value={o.id} />

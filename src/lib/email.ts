@@ -380,3 +380,31 @@ function generateInvoiceEmailHtml(data: {
     </div>
   `;
 }
+
+/**
+ * Generic email sender for CRM and other purposes
+ */
+export async function sendEmail(data: {
+  to: string;
+  subject: string;
+  html: string;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await resend.emails.send({
+      from: `Accra Threads <${FROM_EMAIL}>`,
+      to: data.to,
+      subject: data.subject,
+      html: data.html,
+    });
+
+    if (error) {
+      console.error('Failed to send email:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('Email error:', err);
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to send email' };
+  }
+}

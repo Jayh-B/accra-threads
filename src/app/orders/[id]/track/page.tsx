@@ -3,31 +3,65 @@
 import { use, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Package, Truck, CheckCircle2, ChevronRight, FileText } from 'lucide-react';
+import { Package, Truck, CheckCircle2, ChevronRight, FileText, Clock, MapPin, History } from 'lucide-react';
 import { getOrderById } from '@/lib/order-data';
 import { getInvoiceByOrderId } from '@/lib/invoice-actions';
+import { getOrderWithTimeline } from '@/lib/tracking-actions';
 import styles from './page.module.css';
 
 import { OrderWithItems } from '@/lib/order-data';
 
+interface TrackingEvent {
+  id: string;
+  status: string;
+  description: string;
+  location: string | null;
+  created_at: string;
+}
+
 type Order = OrderWithItems;
+
+const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string }> = {
+  pending_payment: { label: 'Pending Payment', icon: Clock, color: '#f59e0b' },
+  paid: { label: 'Paid', icon: CheckCircle2, color: '#10b981' },
+  confirmed: { label: 'Confirmed', icon: CheckCircle2, color: '#10b981' },
+  processing: { label: 'Processing', icon: Package, color: '#3b82f6' },
+  ready_for_pickup: { label: 'Ready for Pickup', icon: Package, color: '#3b82f6' },
+  picked: { label: 'Picked', icon: Package, color: '#3b82f6' },
+  packed: { label: 'Packed', icon: Package, color: '#3b82f6' },
+  handed_to_courier: { label: 'Handed to Courier', icon: Truck, color: '#8b5cf6' },
+  in_transit: { label: 'In Transit', icon: Truck, color: '#8b5cf6' },
+  out_for_delivery: { label: 'Out for Delivery', icon: Truck, color: '#8b5cf6' },
+  delivered: { label: 'Delivered', icon: CheckCircle2, color: '#10b981' },
+  cancelled: { label: 'Cancelled', icon: Clock, color: '#ef4444' },
+};
 
 export default function TrackOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [order, setOrder] = useState<Order | null>(null);
+  const [timeline, setTimeline] = useState<TrackingEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasInvoice, setHasInvoice] = useState(false);
 
   useEffect(() => {
     async function loadOrder() {
       try {
-        const orderData = await getOrderById(id);
-        if (orderData) {
-          setOrder(orderData);
-          // Check if invoice exists
-          const invoiceResult = await getInvoiceByOrderId(id);
-          setHasInvoice(invoiceResult.success);
+        // Try to get full timeline data
+        const timelineResult = await getOrderWithTimeline(id);
+        if (timelineResult.success && timelineResult.order) {
+          setOrder(timelineResult.order as Order);
+          setTimeline(timelineResult.timeline || []);
+        } else {
+          // Fallback to basic order data
+          const orderData = await getOrderById(id);
+          if (orderData) {
+            setOrder(orderData);
+          }
         }
+        
+        // Check if invoice exists
+        const invoiceResult = await getInvoiceByOrderId(id);
+        setHasInvoice(invoiceResult.success);
       } catch (error) {
         console.error('Error loading order:', error);
       } finally {
@@ -153,6 +187,76 @@ export default function TrackOrderPage({ params }: { params: Promise<{ id: strin
                 {order.shipping_address?.phone}
               </p>
             </div>
+
+            {/* Detailed Timeline */}
+            {timeline.length > 0 && (
+              <div style={{ marginTop: '32px' }}>
+                <h3 className="text-lg mb-4">Tracking History</h3>
+                <div style={{ position: 'relative', paddingLeft: '24px' }}>
+                  {/* Timeline line */}
+                  <div style={{
+                    position: 'absolute',
+                    left: '11px',
+                    top: '0',
+                    bottom: '0',
+                    width: '2px',
+                    background: '#e5e7eb',
+                  }} />
+                  
+                  {timeline.slice().reverse().map((event, index) => {
+                    const config = STATUS_CONFIG[event.status] || { label: event.status, icon: History, color: '#9ca3af' };
+                    const Icon = config.icon;
+                    
+                    return (
+                      <div key={event.id} style={{
+                        display: 'flex',
+                        gap: '16px',
+                        marginBottom: '20px',
+                        position: 'relative',
+                      }}>
+                        <div style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: config.color,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          zIndex: 1,
+                          flexShrink: 0,
+                          marginLeft: '-12px',
+                        }}>
+                          <Icon size={12} style={{ color: 'white' }} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div>
+                              <p style={{ margin: 0, fontWeight: 600, color: '#1a1a1a', fontSize: '14px' }}>
+                                {config.label}
+                              </p>
+                              <p style={{ margin: '4px 0 0 0', color: '#4b5563', fontSize: '13px' }}>
+                                {event.description}
+                              </p>
+                              {event.location && (
+                                <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <MapPin size={12} />
+                                  {event.location}
+                                </p>
+                              )}
+                            </div>
+                            <span style={{ fontSize: '11px', color: '#9ca3af', whiteSpace: 'nowrap' }}>
+                              {new Date(event.created_at).toLocaleString('en-GH', {
+                                day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
