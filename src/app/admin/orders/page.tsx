@@ -95,7 +95,7 @@ export default async function AdminOrders() {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Order ID</th>
+                  <th>Order #</th>
                   <th>Customer</th>
                   <th>Date</th>
                   <th>Items</th>
@@ -110,7 +110,7 @@ export default async function AdminOrders() {
                   <tr key={o.id}>
                     <td>
                       <span className={styles.orderId}>
-                        {o.id.slice(0, 8).toUpperCase()}
+                        {o.order_number || o.id.slice(0, 8).toUpperCase()}
                       </span>
                     </td>
                     <td>

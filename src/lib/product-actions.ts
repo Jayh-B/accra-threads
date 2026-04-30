@@ -37,46 +37,60 @@ export type ProductInput = {
  * Create a new product
  */
 export async function createProduct(input: ProductInput): Promise<{ success: boolean; productId?: string; error?: string }> {
+  console.log('[PRODUCT] Creating product:', input.name);
   const db = getAdminClient();
   
   try {
     // Check if slug already exists
-    const { data: existing } = await db
+    console.log('[PRODUCT] Checking slug:', input.slug);
+    const { data: existing, error: slugError } = await db
       .from('products')
       .select('id')
       .eq('slug', input.slug)
       .single();
+    
+    if (slugError && slugError.code !== 'PGRST116') { // PGRST116 = not found (expected)
+      console.error('[PRODUCT] Slug check error:', slugError);
+    }
     
     if (existing) {
       return { success: false, error: 'A product with this slug already exists' };
     }
     
     const productId = crypto.randomUUID();
+    console.log('[PRODUCT] Generated ID:', productId);
     
     // Create product
+    const productData = {
+      id: productId,
+      name: input.name,
+      slug: input.slug,
+      sku: input.sku,
+      category: input.category,
+      gender: input.gender,
+      price: Math.round(input.price * 100), // Convert to pesewas
+      sale_price: input.sale_price ? Math.round(input.sale_price * 100) : null,
+      description: input.description,
+      tags: input.tags,
+      colors: input.colors,
+      sizes: input.sizes,
+      featured: input.featured,
+      published: input.published,
+      images: input.images,
+    };
+    console.log('[PRODUCT] Inserting:', productData);
+    
     const { data: product, error: productError } = await db
       .from('products')
-      .insert({
-        id: productId,
-        name: input.name,
-        slug: input.slug,
-        sku: input.sku,
-        category: input.category,
-        gender: input.gender,
-        price: Math.round(input.price * 100), // Convert to pesewas
-        sale_price: input.sale_price ? Math.round(input.sale_price * 100) : null,
-        description: input.description,
-        tags: input.tags,
-        colors: input.colors,
-        sizes: input.sizes,
-        featured: input.featured,
-        published: input.published,
-        images: input.images,
-      })
+      .insert(productData)
       .select()
       .single();
     
-    if (productError) throw productError;
+    if (productError) {
+      console.error('[PRODUCT] Insert error:', productError);
+      throw productError;
+    }
+    console.log('[PRODUCT] Created successfully:', product?.id);
     
     // Create initial inventory record if published
     if (input.published) {

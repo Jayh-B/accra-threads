@@ -30,6 +30,7 @@ export type AdminOrder = {
   customer_email: string | null;
   item_count: number;
   paystack_reference: string | null;
+  order_number: string | null;
 };
 
 export type AdminCustomer = {
@@ -180,6 +181,7 @@ export async function fetchAdminOrders(limit = 100): Promise<AdminOrder[]> {
     customer_email: o.user_id ? (authEmails[o.user_id] ?? null) : null,
     item_count: countMap[o.id] ?? 0,
     paystack_reference: o.paystack_reference,
+    order_number: o.order_number,
   }));
 }
 
