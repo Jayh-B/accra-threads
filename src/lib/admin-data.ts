@@ -114,16 +114,25 @@ export async function fetchAdminStats(): Promise<AdminStats> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function fetchAdminOrders(limit = 100): Promise<AdminOrder[]> {
+  console.log('[ADMIN] Fetching orders...');
   const db = getAdminClient();
 
   // Fetch orders
   const { data: orders, error } = await db
     .from('orders')
-    .select('id, created_at, status, payment_status, subtotal, vat_amount, total, user_id, paystack_reference')
+    .select('id, created_at, status, payment_status, subtotal, vat_amount, total, user_id, paystack_reference, order_number')
     .order('created_at', { ascending: false })
     .limit(limit);
 
-  if (error || !orders) return [];
+  if (error) {
+    console.error('[ADMIN] ❌ Error fetching orders:', error);
+    return [];
+  }
+  if (!orders || orders.length === 0) {
+    console.log('[ADMIN] No orders found in database');
+    return [];
+  }
+  console.log(`[ADMIN] ✅ Found ${orders.length} orders`);
 
   // Fetch user info for each unique user_id
   const userIds = [...new Set(orders.map((o) => o.user_id).filter(Boolean))] as string[];

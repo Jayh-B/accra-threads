@@ -1,9 +1,13 @@
 'use server';
 
-import { initializeOrderPayment, verifyAndUpdateOrderPayment } from './paystack';
+console.log('🔌 payment-actions.ts module loading...');
+
+import { verifyAndUpdateOrderPayment } from './paystack';
 import { sendOrderConfirmation, sendPaymentConfirmation, OrderEmailData } from './email';
 import { getAdminClient } from './admin-data';
 import { revalidatePath } from 'next/cache';
+
+console.log('✅ payment-actions.ts imports loaded');
 
 /**
  * Create order and initialize Paystack payment
@@ -38,19 +42,35 @@ export async function createOrderWithPayment(input: {
   paymentUrl?: string;
   error?: string;
 }> {
+  console.log('🔧 Getting admin client...');
   const db = getAdminClient();
+  console.log('✅ Admin client created');
 
   try {
+    console.log('[SERVER] 🛒 Starting order creation...');
+    
+    // Test database connection first
+    console.log('[SERVER] 🔍 Testing database connection...');
+    const { data: testData, error: testError } = await db.from('orders').select('count').limit(1);
+    if (testError) {
+      console.error('[SERVER] ❌ Database test failed:', testError);
+      throw new Error(`DB_TEST_FAILED: ${testError.message}`);
+    }
+    console.log('[SERVER] ✅ Database connection OK');
+    
     // Calculate totals
     const subtotal = input.items.reduce((sum, item) => sum + item.price * item.qty, 0);
     const tax = Math.round(subtotal * 0.15);
     const shipping = subtotal > 500 ? 0 : 50;
     const total = subtotal + tax + shipping;
+    console.log('💰 Totals calculated:', { subtotal, tax, shipping, total });
 
     // Generate order number
     const orderNumber = `ORD-${Date.now().toString(36).toUpperCase().slice(-6)}-${Math.random().toString(36).toUpperCase().slice(2, 4)}`;
+    console.log('🏷️ Order number:', orderNumber);
 
     // Create order
+    console.log('📝 Inserting order into database...');
     const { data: order, error: orderError } = await db
       .from('orders')
       .insert({
@@ -78,8 +98,17 @@ export async function createOrderWithPayment(input: {
       .select()
       .single();
 
-    if (orderError) throw orderError;
-    if (!order) throw new Error('Failed to create order');
+    console.log('📦 Order insert result:', { order, orderError, hasData: !!order, hasError: !!orderError });
+    
+    if (orderError) {
+      console.error('[SERVER] ❌ ORDER_INSERT_ERROR:', orderError);
+      throw new Error(`ORDER_INSERT_FAILED: ${orderError.message}`);
+    }
+    if (!order) {
+      console.error('[SERVER] ❌ ORDER_IS_NULL - RLS or insert failed silently');
+      throw new Error('ORDER_INSERT_RETURNED_NULL');
+    }
+    console.log('[SERVER] ✅ Order created:', order.id);
 
     // Create order items
     for (const item of input.items) {
@@ -94,31 +123,26 @@ export async function createOrderWithPayment(input: {
         color: item.color,
       });
 
-      if (itemError) throw itemError;
+      if (itemError) {
+        console.error('[SERVER] ❌ ORDER_ITEM_ERROR:', itemError);
+        throw new Error(`ORDER_ITEM_FAILED: ${itemError.message}`);
+      }
     }
 
-    // Initialize Paystack payment
-    const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/payment/verify?order_id=${order.id}`;
-    const paymentResult = await initializeOrderPayment(
-      order.id,
-      orderNumber,
-      input.email,
-      total * 100,
-      callbackUrl
-    );
+    // Use Paystack Shop for payment (instead of API initialization)
+    const paystackShopUrl = 'https://paystack.shop/pay/accrathreads';
+    console.log('[SERVER] 🌐 Using Paystack Shop:', paystackShopUrl);
 
-    if (!paymentResult.success) {
-      // Payment initialization failed - cancel order
-      await db.from('orders').update({ status: 'payment_failed' }).eq('id', order.id);
-      return { success: false, error: paymentResult.error || 'Payment initialization failed' };
-    }
-
-    // Reserve inventory
-    for (const item of input.items) {
-      await db.rpc('reserve_inventory', {
-        p_product_id: item.id,
-        p_quantity: item.qty,
-      });
+    // Reserve inventory (optional - may fail if RPC doesn't exist)
+    try {
+      for (const item of input.items) {
+        await db.rpc('reserve_inventory', {
+          p_product_id: item.id,
+          p_quantity: item.qty,
+        });
+      }
+    } catch (e) {
+      console.log('[SERVER] Inventory reservation skipped:', e);
     }
 
     // Create delivery record
@@ -163,13 +187,14 @@ export async function createOrderWithPayment(input: {
       success: true,
       orderId: order.id,
       orderNumber,
-      paymentUrl: paymentResult.authorizationUrl,
+      paymentUrl: paystackShopUrl,
     };
   } catch (error) {
-    console.error('Order creation error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'UNKNOWN_ERROR';
+    console.error('[SERVER] ❌ CATCH_BLOCK_ERROR:', errorMessage, error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to create order',
+      error: errorMessage,
     };
   }
 }

@@ -98,16 +98,27 @@ export default function CheckoutPage() {
         momoProvider: payMethod === 'momo' ? momoProvider : undefined,
       });
 
+      console.log('📦 Order result:', JSON.stringify(result, null, 2));
+      alert('DEBUG: result.success=' + result.success + ', paymentUrl=' + (result.paymentUrl ? 'YES' : 'NO') + ', error=' + (result.error || 'none'));
+
       if (result.success && result.paymentUrl) {
         // Redirect to Paystack for payment
+        console.log('✅ Order created, redirecting to Paystack:', result.paymentUrl);
+        alert('Redirecting to: ' + result.paymentUrl.substring(0, 50) + '...');
         clearCart();
+        // Use replace instead of href for cleaner history
         window.location.href = result.paymentUrl;
+        return; // Stop execution here
       } else if (result.success) {
         // No payment URL - something went wrong
+        console.error('❌ Success but no paymentUrl. Result:', result);
+        alert('ERROR: Payment succeeded but no redirect URL. Check console.');
         setOrderNumber(result.orderNumber || '');
         clearCart();
         setStep(3);
       } else {
+        console.error('❌ Order failed:', result.error);
+        alert('ERROR: ' + (result.error || 'Failed to create order'));
         setError(result.error || 'Failed to create order. Please try again.');
       }
     } catch (err) {

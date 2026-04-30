@@ -49,6 +49,16 @@ export async function initializePayment(
   data: PaystackPaymentData
 ): Promise<PaystackResponse> {
   try {
+    if (!PAYSTACK_SECRET) {
+      console.error('❌ PAYSTACK_SECRET_KEY not configured');
+      return {
+        status: false,
+        message: 'Payment gateway not configured. Please add PAYSTACK_SECRET_KEY to .env.local',
+      };
+    }
+
+    console.log('💳 Initializing Paystack payment for:', data.email, 'Amount:', data.amount);
+    
     const response = await fetch(`${PAYSTACK_BASE_URL}/transaction/initialize`, {
       method: 'POST',
       headers: {
@@ -67,6 +77,12 @@ export async function initializePayment(
     });
 
     const result = await response.json();
+    console.log('📥 Paystack response:', { status: result.status, hasData: !!result.data });
+    
+    if (!result.status) {
+      console.error('❌ Paystack error:', result.message);
+    }
+    
     return result;
   } catch (error) {
     console.error('Paystack initialization error:', error);
