@@ -181,18 +181,21 @@ CREATE TABLE IF NOT EXISTS deliveries (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Add partner_id column if deliveries table exists from previous run
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'deliveries' AND column_name = 'partner_id') THEN
+    ALTER TABLE deliveries ADD COLUMN partner_id UUID REFERENCES partners(id);
+  END IF;
+END $$;
+
 ALTER TABLE deliveries ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Admin full access on deliveries" ON deliveries
   FOR ALL USING (auth.uid() IN (SELECT id FROM users WHERE role = 'admin'));
 
-CREATE POLICY "Users view own deliveries" ON deliveries
-  FOR SELECT USING (
-    order_id IN (SELECT id FROM orders WHERE user_id = auth.uid())
-    OR partner_id IN (SELECT id FROM partners WHERE id IN (
-      SELECT partner_id FROM partner_users WHERE user_id = auth.uid()
-    ))
-  );
+-- Note: Users view policy is created after partner_users table is defined below
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- DELIVERY ITEMS
@@ -306,6 +309,15 @@ ALTER TABLE partner_users ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Admin full access on partner_users" ON partner_users
   FOR ALL USING (auth.uid() IN (SELECT id FROM users WHERE role = 'admin'));
 
+-- Create the deliveries user view policy now that partner_users exists
+CREATE POLICY "Users view own deliveries" ON deliveries
+  FOR SELECT USING (
+    order_id IN (SELECT id FROM orders WHERE user_id = auth.uid())
+    OR partner_id IN (SELECT id FROM partners WHERE id IN (
+      SELECT partner_id FROM partner_users WHERE user_id = auth.uid()
+    ))
+  );
+
 -- ============================================================================
 -- INDICES FOR PERFORMANCE
 -- ============================================================================
@@ -333,46 +345,37 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create triggers for updated_at
+-- Create triggers for updated_at (drop if exists first)
+DROP TRIGGER IF EXISTS update_suppliers_updated_at ON suppliers;
 CREATE TRIGGER update_suppliers_updated_at BEFORE UPDATE ON suppliers
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_partners_updated_at ON partners;
 CREATE TRIGGER update_partners_updated_at BEFORE UPDATE ON partners
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_inventory_updated_at ON inventory;
 CREATE TRIGGER update_inventory_updated_at BEFORE UPDATE ON inventory
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_purchase_orders_updated_at ON purchase_orders;
 CREATE TRIGGER update_purchase_orders_updated_at BEFORE UPDATE ON purchase_orders
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_deliveries_updated_at ON deliveries;
 CREATE TRIGGER update_deliveries_updated_at BEFORE UPDATE ON deliveries
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_marketplace_listings_updated_at ON marketplace_listings;
 CREATE TRIGGER update_marketplace_listings_updated_at BEFORE UPDATE ON marketplace_listings
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_supplier_products_updated_at ON supplier_products;
 CREATE TRIGGER update_supplier_products_updated_at BEFORE UPDATE ON supplier_products
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================================
--- SAMPLE DATA (Optional - for testing)
+-- SAMPLE DATA (Optional - add via Supabase UI or separate INSERTs)
 -- ============================================================================
-
--- Sample Suppliers
-INSERT INTO suppliers (name, code, type, status, contact_person, email, phone, city, region, payment_terms, rating)
-VALUES 
-  ('Bonwire Kente Weavers Co-op', 'KENT-001', 'artisan', 'active', 'Kwame Asante', 'kwame@bonwirekente.gh', '+233 24 111 2222', 'Bonwire', 'Ashanti', 'NET_30', 5),
-  ('Accra Textile Mills', 'TEXT-001', 'fabric_supplier', 'active', 'Sarah Mensah', 'orders@accratextile.gh', '+233 30 222 3333', 'Tema', 'Greater Accra', 'NET_60', 4),
-  ('Adinkra Crafts Ltd', 'ADIN-001', 'manufacturer', 'active', 'Kofi Boateng', 'info@adinkracrafts.gh', '+233 24 444 5555', 'Kumasi', 'Ashanti', 'COD', 5),
-  ('Ghana Cotton Farmers Assn', 'COTT-001', 'fabric_supplier', 'active', 'Ama Darko', 'sales@ghanacotton.gh', '+233 20 666 7777', 'Tamale', 'Northern', 'NET_30', 4)
-ON CONFLICT (code) DO NOTHING;
-
--- Sample Partners
-INSERT INTO partners (name, code, type, status, commission_rate, city, country, region_served, contract_start, sales_target)
-VALUES 
-  ('Jumia Ghana', 'JUMIA-GH', 'online_marketplace', 'active', 15.00, 'Accra', 'Ghana', ARRAY['Greater Accra', 'Ashanti', 'Western'], '2024-01-01', 500000),
-  ('Shopify US Store', 'SHOP-US', 'online_marketplace', 'active', 0.00, 'New York', 'USA', ARRAY['North America', 'Europe'], '2024-03-01', 100000),
-  ('Boutique Adanwomase', 'BOUT-ADA', 'retail_boutique', 'active', 30.00, 'Adanwomase', 'Ghana', ARRAY['Ashanti'], '2024-01-15', 50000),
-  ('Amazon Handmade', 'AMZN-HM', 'online_marketplace', 'active', 20.00, 'Seattle', 'USA', ARRAY['North America', 'Europe', 'Asia'], '2024-06-01', 200000)
-ON CONFLICT (code) DO NOTHING;
+-- Note: Sample data removed to avoid column mismatch errors.
+-- Add test data manually via Supabase Table Editor or custom INSERTs.
