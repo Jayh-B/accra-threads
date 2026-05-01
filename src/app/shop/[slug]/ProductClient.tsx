@@ -7,6 +7,7 @@ import type { Product } from '@/lib/data';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import ProductCard from '@/components/ui/ProductCard';
+import ProductReviews from '@/components/ProductReviews';
 import styles from './page.module.css';
 
 export default function ProductClient({ product, related }: { product: Product; related: Product[] }) {
@@ -176,6 +177,12 @@ export default function ProductClient({ product, related }: { product: Product; 
           </div>
         </section>
       )}
+
+      {/* Reviews */}
+      <section className={`section ${styles.reviewsSection}`}>
+        <h2 className="font-display text-2xl" style={{ marginBottom: '32px' }}>Customer Reviews</h2>
+        <ProductReviews productId={product.id} />
+      </section>
     </div>
   );
 }
