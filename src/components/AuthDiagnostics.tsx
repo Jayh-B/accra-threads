@@ -139,6 +139,55 @@ export default function AuthDiagnostics() {
         };
       }
 
+      // 6. Check Google OAuth provider
+      try {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback`,
+            skipBrowserRedirect: true, // Don't actually redirect, just check if provider is configured
+          },
+        });
+
+        if (error) {
+          if (error.message.includes('provider is not enabled') || error.message.includes('Provider not enabled')) {
+            results.googleOAuth = {
+              status: '❌ Google OAuth not enabled in Supabase',
+              error: error.message,
+              fix: 'Enable Google provider in Supabase Dashboard → Authentication → Providers',
+              guide: 'See GOOGLE_OAUTH_FIX.md',
+            };
+          } else if (error.message.includes('redirect') || error.message.includes('Redirect')) {
+            results.googleOAuth = {
+              status: '⚠️ Redirect URL issue',
+              error: error.message,
+              fix: 'Add your domain to Supabase Redirect URLs',
+              guide: 'See GOOGLE_OAUTH_FIX.md',
+            };
+          } else {
+            results.googleOAuth = {
+              status: '⚠️ Google OAuth error',
+              error: error.message,
+            };
+          }
+        } else if (data?.url) {
+          results.googleOAuth = {
+            status: '✅ Google OAuth configured',
+            note: 'OAuth URL generated successfully - provider is enabled',
+          };
+        } else {
+          results.googleOAuth = {
+            status: 'ℹ️ Cannot verify Google OAuth',
+            note: 'Unable to test - check Supabase dashboard configuration',
+          };
+        }
+      } catch (err: unknown) {
+        results.googleOAuth = {
+          status: '❌ Google OAuth check failed',
+          error: err instanceof Error ? err.message : String(err),
+        };
+      }
+
       setStatus(results);
       setLoading(false);
     };
