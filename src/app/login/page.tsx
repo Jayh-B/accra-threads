@@ -203,18 +203,35 @@ function LoginContent() {
     try {
       const supabase = getSupabaseBrowserClient();
       console.log('🔐 Starting Google OAuth');
+      console.log('📍 Current origin:', location.origin);
+      console.log('🔗 Redirect URL:', `${location.origin}/auth/callback?next=${redirectTo}`);
+
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${location.origin}/auth/callback?next=${redirectTo}`,
         },
       });
-      if (oauthError) throw oauthError;
+
+      if (oauthError) {
+        console.error('❌ OAuth error details:', oauthError);
+        throw oauthError;
+      }
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Google sign-in failed. Please try again.';
+      const errorMessage = err instanceof Error ? err.message : 'Google sign-in failed. Please try again.';
       console.error('❌ OAuth error:', errorMessage);
-      setError(errorMessage);
+
+      // Provide user-friendly error messages for common issues
+      let userError = errorMessage;
+      if (errorMessage.includes('provider is not enabled') || errorMessage.includes('Provider not enabled')) {
+        userError = '⚠️ Google sign-in is not enabled. Please contact support or use email sign-in.';
+      } else if (errorMessage.includes('redirect') || errorMessage.includes('Redirect')) {
+        userError = '⚠️ Configuration error: Redirect URL mismatch. See GOOGLE_OAUTH_FIX.md';
+      } else if (errorMessage.includes('Client') || errorMessage.includes('client_id')) {
+        userError = '⚠️ Google OAuth credentials are not configured correctly. See GOOGLE_OAUTH_FIX.md';
+      }
+
+      setError(userError);
       setIsLoading(false);
     }
   }
